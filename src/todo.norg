@@ -1,0 +1,18 @@
+* Workout tracker
+   A CLI application written in C to help manage and see the workout progress.
+   Possible features: 
+   - Make new entries for workouts with the date and what was done on the day, this should be stored in a new text file.
+   - Be able to see the stats, PRs for specific lifts.
+   - Be able to see what lifts have not been improving for a while
+
+   I thought of maybe making the TUI include a level system with points gained for every gym entry you make.
+   Maybe with some points multiplier for having a streak or meeting your weekly goal.
+
+   Maybe make this into a TUI that can encourage the coding community to get in some workouts and to lead a more healthy lifestyle.
+   But I will see, as maybe this will be another application of itself, a mobile app perhaps?
+   I could maybe think of a way to connect the 2 applications together but that does sound very annoying and cumbersome.
+
+   First let me get the basic idea done and then I can think of maybe expanding it into something bigger or making a new application all together.
+
+** TODO
+   - ( ) add a calendar that will have colors for days with a matching workout and days without it
