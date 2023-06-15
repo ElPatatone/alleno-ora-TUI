@@ -5,6 +5,8 @@ void center(char *title);
 
 int main(void)
 {
+    char date[10];
+
     initscr();  // Initialize the ncurses library
     attron(A_BOLD);
     center("Hello, ready to lift some weights?");
@@ -14,7 +16,11 @@ int main(void)
     clear();
     addstr("ALLENO-ORA (TRAIN NOW)\n");
     attroff(A_BOLD);
-    addstr("Make new entry for: ");
+
+    move(3, 0);
+    addstr("Make new workout entry for date: ");
+    getstr(date);
+    printw("You have chosen %s as the date", date);
     refresh();
     getch();
     endwin();  // End the ncurses mode
