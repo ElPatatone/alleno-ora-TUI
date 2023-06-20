@@ -1,18 +1,6 @@
 #include <ncurses.h>
 #include <string.h>
-
-#define MAX_WORKOUTS 365
-
-void center(char *title);
-void welcomeScreen();
-
-typedef struct Workout {
-
-    char date[10];
-    char training[10];
-    char time[10];
-
-} Workout;
+#include "utils.h"
 
 int main(void)
 {
@@ -46,24 +34,3 @@ int main(void)
     return 0;
 }
 
-void center(char *title)
-{
-    int len, indent, rows, cols;
-
-    getmaxyx(stdscr, rows, cols);
-    len = strlen(title);
-    indent = cols - len;
-    indent /= 2;
-    rows =  rows / 2 - 1;
-    mvaddstr(rows, indent, title);
-    refresh();
-}
-
-void welcomeScreen()
-{
-    attron(A_BOLD);
-    center("Hello, ready to lift some weights?");
-    refresh();
-    getch();
-    return;
-}
