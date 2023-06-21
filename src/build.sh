@@ -1,1 +1,1 @@
-gcc -o main utils.c main.c -lncurses
+gcc -o main main.c -lncurses
