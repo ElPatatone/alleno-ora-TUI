@@ -15,7 +15,8 @@
    First let me get the basic idea done and then I can think of maybe expanding it into something bigger or making a new application all together.
 
 ** TODO
-   - ( ) fix issue with training value appending to the date in the end 
+   - ( ) read and write information to a file
+   - ( ) display the inforamtion in the TUI as a formatted table instead
    - ( ) calculate average time spent for workouts in a given time frame
    - ( ) show the improvement for a lift over the course of a time frame
    - ( ) add a calendar that will have colors for days with a matching workout and days without it

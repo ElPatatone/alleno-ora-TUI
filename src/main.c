@@ -49,11 +49,7 @@ void welcomeScreen() {
 void addWorkout(Workout *workout, int *workoutNum) {
     clear();
 
-    int iteration1 = 1;
     while (1) {
-        // if (iteration1 > 1) {
-        //     printw("Training done: %s\n", workout[*workoutNum].training);
-        // }
         addstr("Date (DD/MM/YYYY): ");
         refresh();
         getnstr(workout[*workoutNum].date, sizeof(workout[*workoutNum].date));
@@ -63,12 +59,10 @@ void addWorkout(Workout *workout, int *workoutNum) {
         if (sscanf(workout[*workoutNum].date, "%d/%d/%d", &day, &month, &year) != 3) {
             invalidInput("Invalid date format. Please use the format DD/MM/YYYY.");
             refresh();
-            // iteration1++;
         } else {
             if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
                 invalidInput("Invalid date. Please enter a valid date.");
                 refresh();
-                // iteration1++;
             } else {
                 break;
             }
@@ -76,12 +70,11 @@ void addWorkout(Workout *workout, int *workoutNum) {
     }
     printw("You have chosen %s as the date\n", workout[*workoutNum].date);
 
-    int iteration2 = 1;
+    int iteration1 = 1;
     while (1) {
-        // if (iteration2 > 1) {
-        //     printw("Training done: %s\n", workout[*workoutNum].training);
-        //     printw("Date (DD/MM/YYYY): %s\n", workout[*workoutNum].date);
-        // }
+        if (iteration1 > 1) {
+            printw("Date (DD/MM/YYYY): %s\n", workout[*workoutNum].date);
+        }
         addstr("Time (HH:MM): ");
         refresh();
         getnstr(workout[*workoutNum].time, sizeof(workout[*workoutNum].time));
@@ -91,12 +84,12 @@ void addWorkout(Workout *workout, int *workoutNum) {
         if (sscanf(workout[*workoutNum].time, "%d:%d", &hour, &minute) != 2) {
             invalidInput("Invalid time format. Please use the format HH:MM.");
             refresh();
-            // iteration2++;
+            iteration1++;
         } else {
             if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
                 invalidInput("Invalid time. Please enter a valid time.");
                 refresh();
-                // iteration2++;
+                iteration1++;
             } else {
                 break;
             }
@@ -104,19 +97,18 @@ void addWorkout(Workout *workout, int *workoutNum) {
     }
     printw("You trained at %s.\n", workout[*workoutNum].time);
 
-    int iteration3 = 1;
+    int iteration2 = 1;
     while (1){
-        // if (iteration3> 1) {
-        //     printw("Training done: %s\n", workout[*workoutNum].training);
-        //     printw("Date (DD/MM/YYYY) %s\n", workout[*workoutNum].date);
-        //     printw("Time (HH:MM): %s\n", workout[*workoutNum].time);
-        // }
+        if (iteration2 > 1) {
+            printw("Date (DD/MM/YYYY): %s\n", workout[*workoutNum].date);
+            printw("Time (HH:MM): %s\n", workout[*workoutNum].time);
+        }
         addstr("Duration (minutes): ");
         refresh();
 
         if (scanw("%d", &workout[*workoutNum].duration) != 1 || workout[*workoutNum].duration <= 0) {
             invalidInput("Invalid input for duration.");
-            // iteration3++;
+            iteration2++;
         } else {
             break;
         }
@@ -124,6 +116,12 @@ void addWorkout(Workout *workout, int *workoutNum) {
     printw("You trained for %d.\n", workout[*workoutNum].duration);
 
     //getting training value
+        // int iteration3 = 1;
+        // if (iteration3> 1) {
+        //     printw("Training done: %s\n", workout[*workoutNum].training);
+        //     printw("Date (DD/MM/YYYY) %s\n", workout[*workoutNum].date);
+        //     printw("Time (HH:MM): %s\n", workout[*workoutNum].time);
+        // }
     addstr("Training done: ");
     refresh();
     getnstr(workout[*workoutNum].training, sizeof(workout[*workoutNum].training));
