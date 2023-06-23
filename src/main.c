@@ -6,9 +6,9 @@
 
 typedef struct Workout {
 
-    char date[10];
-    char training[10];
-    char time[10];
+    char date[15];
+    char training[100];
+    char time[15];
     int duration;
 
 } Workout;
@@ -102,7 +102,7 @@ void addWorkout(Workout *workout, int *workoutNum) {
             }
         }
     }
-    // printw("You trained at %s.\n", workout[*workoutNum].time);
+    printw("You trained at %s.\n", workout[*workoutNum].time);
 
     int iteration3 = 1;
     while (1){
@@ -122,15 +122,16 @@ void addWorkout(Workout *workout, int *workoutNum) {
         }
     }
     printw("You trained for %d.\n", workout[*workoutNum].duration);
-    printw("You have chosen %s as the date\n", workout[*workoutNum].date);
 
+    //getting training value
     addstr("Training done: ");
     refresh();
     getnstr(workout[*workoutNum].training, sizeof(workout[*workoutNum].training));
+    // remove the training value appended to the date value (No idea why this happens)
+    strtok(workout[*workoutNum].date, " \t\n");
     printw("You trained %s.\n", workout[*workoutNum].training);
 
     refresh();
-    printw("You have chosen %s as the date\n", workout[*workoutNum].date);
     getch();
 
     (*workoutNum)++;

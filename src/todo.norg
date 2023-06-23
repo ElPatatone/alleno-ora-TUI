@@ -15,8 +15,7 @@
    First let me get the basic idea done and then I can think of maybe expanding it into something bigger or making a new application all together.
 
 ** TODO
-   - ( ) do more error handling for the inputs
-   - ( ) read and write workout information to a file
+   - ( ) fix issue with training value appending to the date in the end 
    - ( ) calculate average time spent for workouts in a given time frame
    - ( ) show the improvement for a lift over the course of a time frame
    - ( ) add a calendar that will have colors for days with a matching workout and days without it
