@@ -15,8 +15,10 @@
    First let me get the basic idea done and then I can think of maybe expanding it into something bigger or making a new application all together.
 
 ** TODO
-   - ( ) read and write information to a file
    - ( ) display the inforamtion in the TUI as a formatted table instead
+   - ( ) add options to display information for a given time frame: week, month etc (use the time.h)
+   - ( ) add ability to sort by oldest or newest entry, most time spent, earliest or latest workout.
+   - ( ) read and write information to a file
    - ( ) calculate average time spent for workouts in a given time frame
    - ( ) show the improvement for a lift over the course of a time frame
    - ( ) add a calendar that will have colors for days with a matching workout and days without it

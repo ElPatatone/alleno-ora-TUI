@@ -140,19 +140,23 @@ void displayWorkouts(Workout *workout, int length) {
     clear();
     mvprintw(0, 0, "Displaying all workouts");
 
-
     for (int i = 0; i < length; i++) {
+        strcpy(workout[i].date, "12/12/2002");
+        strcpy(workout[i].time, "12:12");
+        workout[i].duration = 123;
+        strcpy(workout[i].training, "test");
+
         mvprintw(i + 2, 0, "Date: %s", workout[i].date);
         mvprintw(i + 2, 20, "Time: %s", workout[i].time);
         mvprintw(i + 2, 40, "Duration: %d", workout[i].duration);
         mvprintw(i + 2, 55, "Training: %s", workout[i].training);
     }
 
-    mvprintw(length + 3, 0, "Press any key to continue...");
+    mvprintw(length + 3, 0, "Press key to continue...");
     refresh();
-    getch();
+    while (getch() != '\n') {
+    }
 }
-
 
 int main(void) {
     Workout workout1[MAX_WORKOUTS];
@@ -179,7 +183,7 @@ int main(void) {
                 addWorkout(workout1, &workoutNum);
                 break;
             case 2:
-                displayWorkouts(workout1, workoutNum);
+                displayWorkouts(workout1, 50);
                 break;
             case 3:
                 endwin();
