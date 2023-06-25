@@ -198,7 +198,7 @@ void displayWorkouts(Workout *workout, int length, WINDOW *menuWin) {
             workout[i].duration = 123;
             strcpy(workout[i].training, "test");
 
-            mvwprintw(menuWin, i - topIndex + 2, 2, "%d - Date: %s", workoutNumber, workout[i].date);
+            mvwprintw(menuWin, i - topIndex + 2.5, 2, "%d - Date: %s", workoutNumber, workout[i].date);
             mvwprintw(menuWin, i - topIndex + 2, 25, "Time: %s", workout[i].time);
             mvwprintw(menuWin, i - topIndex + 2, 40, "Duration: %d", workout[i].duration);
             mvwprintw(menuWin, i - topIndex + 2, 55, "Training: %s", workout[i].training);
