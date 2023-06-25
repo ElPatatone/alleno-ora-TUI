@@ -3,6 +3,7 @@
 #include <ctype.h>
 
 #define MAX_WORKOUTS 365
+#define WINDOW_MARGIN 2
 
 typedef struct Workout {
 
@@ -158,6 +159,52 @@ void displayWorkouts(Workout *workout, int length) {
     }
 }
 
+int displayMenu(){
+    int terminalWidth, terminalHeight;
+    getmaxyx(stdscr, terminalHeight, terminalWidth); // Get terminal dimensions
+
+    int windowHeight = terminalHeight - WINDOW_MARGIN;
+    int windowWidth = terminalWidth - WINDOW_MARGIN;
+
+    // Create a new window with the calculated dimensions and position
+    WINDOW *menuWin = newwin(windowHeight, windowWidth, WINDOW_MARGIN, WINDOW_MARGIN);
+    box(menuWin, 0, 0); // Draw solid borders around the window
+    refresh();
+    wrefresh(menuWin);
+
+    // Text to be centered
+    const char* text1 = "1. Add Workout";
+    const char* text2 = "2. Display Workouts";
+    const char* text3 = "3. Exit";
+    const char* text4 = "Enter your choice: ";
+
+    int numLines = 4; // Total number of lines of text
+    int textLength1 = strlen(text1);
+    int textLength2 = strlen(text2);
+    int textLength3 = strlen(text3);
+    int textLength4 = strlen(text4);
+
+    int centerX = (windowWidth - textLength1) / 2; // Calculate the center position
+    int centerY = (windowHeight - numLines) / 2; // Calculate the center position
+
+    mvwprintw(menuWin, centerY, centerX, text1);
+    mvwprintw(menuWin, centerY + 1, centerX, text2);
+    mvwprintw(menuWin, centerY + 2, centerX, text3);
+    mvwprintw(menuWin, centerY + 3, centerX, text4);
+    wrefresh(menuWin);
+
+    // resetting the cursor to be in the menu window
+    wmove(menuWin, centerY + 3, centerX + textLength4);
+    wrefresh(menuWin);
+
+    char choiceString[10];
+    wgetstr(menuWin, choiceString);
+    int choice = atoi(choiceString);
+
+    wrefresh(menuWin);
+    return choice;
+}
+
 int main(void) {
     Workout workout1[MAX_WORKOUTS];
     int workoutNum = 0;
@@ -171,12 +218,8 @@ int main(void) {
     while (1) {
         clear();
         mvprintw(0, 0, "ALLENO-ORA (TRAIN NOW)");
-        mvprintw(2, 0, "1. Add Workout");
-        mvprintw(3, 0, "2. Display Workouts");
-        mvprintw(4, 0, "3. Exit");
-        mvprintw(6, 0, "Enter your choice: ");
-        refresh();
-        scanw("%d", &choice);
+
+        choice = displayMenu();
 
         switch (choice) {
             case 1:

@@ -16,9 +16,11 @@
 
 ** TODO
    - ( ) display the inforamtion in the TUI as a formatted table instead
+   - ( ) read and write information to a file
+
+*** EXTRA
    - ( ) add options to display information for a given time frame: week, month etc (use the time.h)
    - ( ) add ability to sort by oldest or newest entry, most time spent, earliest or latest workout.
-   - ( ) read and write information to a file
    - ( ) calculate average time spent for workouts in a given time frame
    - ( ) show the improvement for a lift over the course of a time frame
    - ( ) add a calendar that will have colors for days with a matching workout and days without it
