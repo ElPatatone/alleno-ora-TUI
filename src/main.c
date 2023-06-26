@@ -1,5 +1,7 @@
 #include <ncurses.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <ctype.h>
 
 #define MAX_WORKOUTS 365
@@ -193,10 +195,10 @@ void displayWorkouts(Workout *workout, int length, WINDOW *menuWin) {
 
         for (int i = topIndex; i < topIndex + numVisibleRows && i < length; i++) {
             int workoutNumber = i + 1;
-            strcpy(workout[i].date, "12/12/2002");
-            strcpy(workout[i].time, "12:12");
-            workout[i].duration = 123;
-            strcpy(workout[i].training, "test");
+            // strcpy(workout[i].date, "12/12/2002");
+            // strcpy(workout[i].time, "12:12");
+            // workout[i].duration = 123;
+            // strcpy(workout[i].training, "test");
 
             mvwprintw(menuWin, i - topIndex + 2, 2, "%d - Date: %s", workoutNumber, workout[i].date);
             mvwprintw(menuWin, i - topIndex + 2, 25, "Time: %s", workout[i].time);
@@ -266,6 +268,71 @@ int displayMenu(int windowHeight, int windowWidth, WINDOW *menuWin){
     return choice;
 }
 
+int compareByDate(const void *a, const void *b) {
+    const Workout *workoutA = (const Workout *)a;
+    const Workout *workoutB = (const Workout *)b;
+    
+    // Compare the date strings directly using lexicographic sorting
+    return strcmp(workoutB->date, workoutA->date);
+}
+
+void saveWorkoutsToFile(Workout *workouts, int length) {
+    FILE *file = fopen("workouts.txt", "a+");
+    if (file == NULL) {
+        printf("Failed to open file for writing.\n");
+        return;
+    }
+
+    // Write the sorted workouts to the file
+    for (int i = 0; i < length; i++) {
+        int workoutNumber = i + 1;
+        fprintf(file, "%d Date: %s, Time: %s, Duration: %d, Training: %s\n",
+                workoutNumber, workouts[i].date, workouts[i].time,
+                workouts[i].duration, workouts[i].training);
+    }
+
+    fclose(file);
+    printf("Workouts saved to file.\n");
+}
+
+void orderFileByDate() {
+    FILE *file = fopen("workouts.txt", "r+");
+    if (file == NULL) {
+        printf("Failed to open file for reading and writing.\n");
+        return;
+    }
+
+    char line[256];
+    Workout workouts[100];  // Assuming a maximum of 100 workouts
+
+    int i = 0;
+    while (fgets(line, sizeof(line), file) != NULL) {
+        sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
+               workouts[i].date, workouts[i].time, &workouts[i].duration, workouts[i].training);
+        i++;
+    }
+
+    int numWorkouts = i;
+    qsort(workouts, numWorkouts, sizeof(Workout), compareByDate);
+
+    fseek(file, 0, SEEK_SET);
+
+    for (i = 0; i < numWorkouts; i++) {
+        int workoutNumber = i + 1;
+        fprintf(file, "%d Date: %s, Time: %s, Duration: %d, Training: %s\n",
+                workoutNumber, workouts[i].date, workouts[i].time,
+                workouts[i].duration, workouts[i].training);
+    }
+
+    int truncateResult = ftruncate(fileno(file), ftell(file));
+    if (truncateResult != 0) {
+        printf("Failed to truncate the file.\n");
+    }
+
+    fclose(file);
+    printf("Workouts sorted and saved to workouts.txt.\n");
+}
+
 int main(void) {
     Workout workout1[MAX_WORKOUTS];
     int workoutNum = 0;
@@ -300,9 +367,11 @@ int main(void) {
                 addWorkout(workout1, &workoutNum, menuWin);
                 break;
             case 2:
-                displayWorkouts(workout1, 50, menuWin);
+                displayWorkouts(workout1, workoutNum, menuWin);
                 break;
             case 3:
+                saveWorkoutsToFile(workout1, workoutNum);
+                orderFileByDate();
                 endwin();
                 return 0;
             default:
