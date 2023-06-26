@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #define MAX_WORKOUTS 365
 #define WINDOW_MARGIN 2
@@ -271,9 +272,35 @@ int displayMenu(int windowHeight, int windowWidth, WINDOW *menuWin){
 int compareByDate(const void *a, const void *b) {
     const Workout *workoutA = (const Workout *)a;
     const Workout *workoutB = (const Workout *)b;
-    
-    // Compare the date strings directly using lexicographic sorting
-    return strcmp(workoutB->date, workoutA->date);
+
+    // Parse the date strings
+    int dayA, monthA, yearA;
+    int dayB, monthB, yearB;
+    sscanf(workoutA->date, "%d/%d/%d", &dayA, &monthA, &yearA);
+    sscanf(workoutB->date, "%d/%d/%d", &dayB, &monthB, &yearB);
+
+    // Compare year first
+    if (yearA > yearB) {
+        return -1;
+    } else if (yearA < yearB) {
+        return 1;
+    }
+
+    // Compare month next (reversed)
+    if (monthA > monthB) {
+        return -1;
+    } else if (monthA < monthB) {
+        return 1;
+    }
+
+    // Compare day last (reversed)
+    if (dayA > dayB) {
+        return -1;
+    } else if (dayA < dayB) {
+        return 1;
+    }
+    // Dates are equal
+    return 0;
 }
 
 void saveWorkoutsToFile(Workout *workouts, int length) {
