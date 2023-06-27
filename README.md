@@ -43,6 +43,11 @@ The program is still in developement and I have a lot of ideas I want to add, ex
 
 ## Demo
 
+<video controls>
+  <source src="demo/demo.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
 ## TODO
 
 - [ ] Improve the UI as a lot of space is wasted.
