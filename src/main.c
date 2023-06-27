@@ -177,10 +177,77 @@ void addWorkout(Workout *workout, int *workoutNum, WINDOW *menuWin) {
     return;
 }
 
+// void displayWorkouts(WINDOW *menuWin) {
+//
+//     FILE *file = fopen("workouts.txt", "r");
+//     if (file == NULL) {
+//         mvwprintw(menuWin, 2, 2, "No workouts found. Please add workouts first.");
+//         wrefresh(menuWin);
+//         getch();
+//         return;
+//     }
+//
+//     wclear(menuWin);
+//     box(menuWin, 0, 0);
+//     // mvwprintw(menuWin, 0, 0, "Displaying all workouts");
+//
+//     int maxRows, maxCols;
+//     getmaxyx(menuWin, maxRows, maxCols);
+//
+//     int topIndex = 0;  // Index of the topmost visible workout
+//     int numVisibleRows = maxRows - 5;  // Adjust the number of visible rows as needed
+//
+//     char line[256];
+//     int workoutNumber = 0;
+//
+//     // Print table headers
+//     mvwprintw(menuWin, 1, 2, "Workout No.");
+//     mvwprintw(menuWin, 1, 18, "Date");
+//     mvwprintw(menuWin, 1, 26, "Time");
+//
+//     // Draw top and bottom borders
+//     mvwhline(menuWin, 2, 1, ACS_HLINE, maxCols - 2);  // Top border
+//
+//     while (fgets(line, sizeof(line), file) != NULL) {
+//         workoutNumber++;
+//         if (workoutNumber <= topIndex)
+//             continue;
+//
+//         // Parse the workout information from the line
+//         char date[15], time[15], training[100];
+//         int duration;
+//         sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
+//                date, time, &duration, training);
+//
+//         // Calculate row position for the workout
+//         int row = workoutNumber - topIndex + 2;
+//
+//         // Print workout information in table format
+//         mvwprintw(menuWin, row, 2, "%d", workoutNumber);
+//         mvwprintw(menuWin, row, 18, "%s", date);
+//         mvwprintw(menuWin, row, 34, "%s", time);
+//         mvwprintw(menuWin, row, 48, "%d", duration);
+//         mvwprintw(menuWin, row, 64, "%s", training);
+//
+//         if (workoutNumber >= topIndex + numVisibleRows)
+//             break;
+//     }
+//
+//     fclose(file);
+//
+//     if (workoutNumber > numVisibleRows) {
+//         mvwprintw(menuWin, numVisibleRows + 3, 2, "Use UP/DOWN arrow keys to scroll");
+//     } else {
+//         mvwprintw(menuWin, numVisibleRows + 3, 2, "Press any key to continue...");
+//     }
+//
+//     wrefresh(menuWin);
+//     getch();
+// }
+
 void displayWorkouts(WINDOW *menuWin) {
     wclear(menuWin);
     box(menuWin, 0, 0);
-    mvwprintw(menuWin, 1, 2, "Displaying all workouts");
 
     FILE *file = fopen("workouts.txt", "r");
     if (file == NULL) {
@@ -199,6 +266,11 @@ void displayWorkouts(WINDOW *menuWin) {
     char line[256];
     int workoutNumber = 0;
 
+    wattron(menuWin, A_BOLD);
+    mvwprintw(menuWin, 1, 2, "Displaying all workouts");
+    wattroff(menuWin, A_BOLD);
+    mvwhline(menuWin, 2, 1, ACS_HLINE, maxCols - 2);  // Top border
+
     while (fgets(line, sizeof(line), file) != NULL) {
         workoutNumber++;
         if (workoutNumber <= topIndex)
@@ -210,10 +282,10 @@ void displayWorkouts(WINDOW *menuWin) {
         sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
                date, time, &duration, training);
 
-        mvwprintw(menuWin, workoutNumber - topIndex + 1, 2, "%d - Date: %s", workoutNumber, date);
-        mvwprintw(menuWin, workoutNumber - topIndex + 1, 25, "Time: %s", time);
-        mvwprintw(menuWin, workoutNumber - topIndex + 1, 40, "Duration: %d", duration);
-        mvwprintw(menuWin, workoutNumber - topIndex + 1, 55, "Training: %s", training);
+        mvwprintw(menuWin, workoutNumber - topIndex + 2, 2, "%d - Date: %s", workoutNumber, date);
+        mvwprintw(menuWin, workoutNumber - topIndex + 2, 25, "Time: %s", time);
+        mvwprintw(menuWin, workoutNumber - topIndex + 2, 40, "Duration: %d", duration);
+        mvwprintw(menuWin, workoutNumber - topIndex + 2, 55, "Training: %s", training);
 
         if (workoutNumber >= topIndex + numVisibleRows)
             break;
