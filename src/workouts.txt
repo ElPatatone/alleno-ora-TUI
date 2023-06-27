@@ -1,5 +1,7 @@
 1 Date: 12/12/2023, Time: 12:41, Duration: 312, Training: testing
-2 Date: 12/04/2009, Time: 12:31, Duration: 4, Training: test
-3 Date: 12/12/2002, Time: 12:12, Duration: 123, Training: test
-4 Date: 12/12/2002, Time: 12:12, Duration: 123, Training: rew
-5 Date: 09/12/2002, Time: 12:12, Duration: 123, Training: testingit
+2 Date: 30/06/2023, Time: 15:43, Duration: 123, Training: pull
+3 Date: 25/06/2023, Time: 12:41, Duration: 65, Training: push
+4 Date: 12/04/2009, Time: 12:31, Duration: 4, Training: test
+5 Date: 12/12/2002, Time: 12:12, Duration: 123, Training: test
+6 Date: 12/12/2002, Time: 12:12, Duration: 123, Training: rew
+7 Date: 09/12/2002, Time: 12:12, Duration: 123, Training: testingit

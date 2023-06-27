@@ -15,9 +15,7 @@
    First let me get the basic idea done and then I can think of maybe expanding it into something bigger or making a new application all together.
 
 ** TODO
-    - ( ) read and write information to a file
-    - ( ) sort the workouts by newest to latest in the text file
-   - ( ) read the file and display information accordingly 
+   - ( ) read the sorted file and display information 
 
 *** EXTRA
     - ( ) add ability to sort by most time spent, earliest or latest workout.
