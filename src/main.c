@@ -35,7 +35,7 @@ void invalidInput(const char *errorMessage, WINDOW *menuWin) {
 
     wattron(menuWin, A_BOLD);
     mvwprintw(menuWin, 1, 1, "Error");
-    mvwprintw(menuWin, 2, 1, errorMessage);
+    mvwprintw(menuWin, 2, 1, "%s", errorMessage);
     mvwprintw(menuWin, 4, 1, "Press any key to continue...");
     wattroff(menuWin, A_BOLD);
 
@@ -177,79 +177,15 @@ void addWorkout(Workout *workout, int *workoutNum, WINDOW *menuWin) {
     return;
 }
 
-// void displayWorkouts(WINDOW *menuWin) {
-//
-//     FILE *file = fopen("workouts.txt", "r");
-//     if (file == NULL) {
-//         mvwprintw(menuWin, 2, 2, "No workouts found. Please add workouts first.");
-//         wrefresh(menuWin);
-//         getch();
-//         return;
-//     }
-//
-//     wclear(menuWin);
-//     box(menuWin, 0, 0);
-//     // mvwprintw(menuWin, 0, 0, "Displaying all workouts");
-//
-//     int maxRows, maxCols;
-//     getmaxyx(menuWin, maxRows, maxCols);
-//
-//     int topIndex = 0;  // Index of the topmost visible workout
-//     int numVisibleRows = maxRows - 5;  // Adjust the number of visible rows as needed
-//
-//     char line[256];
-//     int workoutNumber = 0;
-//
-//     // Print table headers
-//     mvwprintw(menuWin, 1, 2, "Workout No.");
-//     mvwprintw(menuWin, 1, 18, "Date");
-//     mvwprintw(menuWin, 1, 26, "Time");
-//
-//     // Draw top and bottom borders
-//     mvwhline(menuWin, 2, 1, ACS_HLINE, maxCols - 2);  // Top border
-//
-//     while (fgets(line, sizeof(line), file) != NULL) {
-//         workoutNumber++;
-//         if (workoutNumber <= topIndex)
-//             continue;
-//
-//         // Parse the workout information from the line
-//         char date[15], time[15], training[100];
-//         int duration;
-//         sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
-//                date, time, &duration, training);
-//
-//         // Calculate row position for the workout
-//         int row = workoutNumber - topIndex + 2;
-//
-//         // Print workout information in table format
-//         mvwprintw(menuWin, row, 2, "%d", workoutNumber);
-//         mvwprintw(menuWin, row, 18, "%s", date);
-//         mvwprintw(menuWin, row, 34, "%s", time);
-//         mvwprintw(menuWin, row, 48, "%d", duration);
-//         mvwprintw(menuWin, row, 64, "%s", training);
-//
-//         if (workoutNumber >= topIndex + numVisibleRows)
-//             break;
-//     }
-//
-//     fclose(file);
-//
-//     if (workoutNumber > numVisibleRows) {
-//         mvwprintw(menuWin, numVisibleRows + 3, 2, "Use UP/DOWN arrow keys to scroll");
-//     } else {
-//         mvwprintw(menuWin, numVisibleRows + 3, 2, "Press any key to continue...");
-//     }
-//
-//     wrefresh(menuWin);
-//     getch();
-// }
-
-void displayWorkouts(WINDOW *menuWin) {
+void displayWorkouts(WINDOW *menuWin, const char *directory) {
     wclear(menuWin);
     box(menuWin, 0, 0);
 
-    FILE *file = fopen("workouts.txt", "r");
+    FILE *file;
+    char filePath[100];
+    sprintf(filePath, "%s", directory);
+
+    file = fopen(filePath, "r");
     if (file == NULL) {
         mvwprintw(menuWin, 2, 2, "No workouts found. Please add workouts first.");
         wrefresh(menuWin);
@@ -322,11 +258,11 @@ int displayMenu(int windowHeight, int windowWidth, WINDOW *menuWin){
     int centerX = (windowWidth - textLength1) / 2; // Calculate the center position
     int centerY = (windowHeight - numLines) / 2; // Calculate the center position
 
-    mvwprintw(menuWin, centerY, centerX, text1);
-    mvwprintw(menuWin, centerY + 1, centerX, text2);
-    mvwprintw(menuWin, centerY + 2, centerX, text3);
-    mvwprintw(menuWin, centerY + 3, centerX, text4);
-    mvwprintw(menuWin, centerY + 4, centerX, text5);
+    mvwprintw(menuWin, centerY, centerX, "%s", text1);
+    mvwprintw(menuWin, centerY + 1, centerX, "%s", text2);
+    mvwprintw(menuWin, centerY + 2, centerX, "%s", text3);
+    mvwprintw(menuWin, centerY + 3, centerX, "%s", text4);
+    mvwprintw(menuWin, centerY + 4, centerX, "%s", text5);
     wrefresh(menuWin);
 
     // resetting the cursor to be in the menu window
@@ -375,8 +311,12 @@ int compareByDate(const void *a, const void *b) {
     return 0;
 }
 
-void saveWorkoutsToFile(Workout *workouts, int length) {
-    FILE *file = fopen("workouts.txt", "a+");
+void saveWorkoutsToFile(Workout *workouts, int length, const char *directory) {
+    FILE *file;
+    char filePath[100];
+    sprintf(filePath, "%s", directory);
+
+    file = fopen(filePath, "a+");
     if (file == NULL) {
         printf("Failed to open file for writing.\n");
         return;
@@ -394,8 +334,12 @@ void saveWorkoutsToFile(Workout *workouts, int length) {
     printf("Workouts saved to file.\n");
 }
 
-void orderFileByDate() {
-    FILE *file = fopen("workouts.txt", "r+");
+void orderFileByDate(const char *directory) {
+    FILE *file;
+    char filePath[100];
+    sprintf(filePath, "%s", directory);
+    
+    file = fopen(filePath, "r+");
     if (file == NULL) {
         printf("Failed to open file for reading and writing.\n");
         return;
@@ -432,6 +376,7 @@ void orderFileByDate() {
     printf("Workouts sorted and saved to workouts.txt.\n");
 }
 
+
 int main(void) {
     Workout workout1[MAX_WORKOUTS];
     int workoutNum = 0;
@@ -440,6 +385,18 @@ int main(void) {
     keypad(stdscr, TRUE);
 
     welcomeScreen();
+
+    FILE *configFile;
+    char directory[100] = "";
+    configFile = fopen("config.txt", "r");
+    if (configFile != NULL) {
+        fgets(directory, sizeof(directory), configFile);
+        // Remove newline character if present
+        if (directory[strlen(directory) - 1] == '\n') {
+            directory[strlen(directory) - 1] = '\0';
+        }
+        fclose(configFile);
+    }
 
 
     int choice;
@@ -464,11 +421,11 @@ int main(void) {
         switch (choice) {
             case 1:
                 addWorkout(workout1, &workoutNum, menuWin);
-                saveWorkoutsToFile(workout1, workoutNum);
-                orderFileByDate();
+                saveWorkoutsToFile(workout1, workoutNum, directory);
+                orderFileByDate(directory);
                 break;
             case 2:
-                displayWorkouts(menuWin);
+                displayWorkouts(menuWin, directory);
                 break;
             case 3:
                 endwin();

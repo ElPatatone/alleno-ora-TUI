@@ -13,6 +13,10 @@
    I could maybe think of a way to connect the 2 applications together but that does sound very annoying and cumbersome.
 
    First let me get the basic idea done and then I can think of maybe expanding it into something bigger or making a new application all together.
+    Maybe I can make the app take in other health metrics
+    such as sleep time, heart rate and many others.  
+    All the data will be stored in a text file (current idea) and over time it will accumulate a large amount of data.
+    The data will be stored locally on the text file so maybe I could use the data for some future NN model application trained on my data just for fun.
 
 ** TODO
 
