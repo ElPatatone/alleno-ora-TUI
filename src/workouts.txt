@@ -1,6 +1,0 @@
-1 Date: 14/12/2026, Time: 12:12, Duration: 43, Training: TEST
-2 Date: 12/12/2023, Time: 12:41, Duration: 312, Training: testing
-3 Date: 30/06/2023, Time: 15:43, Duration: 123, Training: pull
-4 Date: 12/05/2020, Time: 12:54, Duration: 32, Training: testing
-5 Date: 03/02/2004, Time: 12:12, Duration: 32, Training: another test
-6 Date: 12/12/2002, Time: 12:12, Duration: 123, Training: test
