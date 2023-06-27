@@ -174,6 +174,7 @@ void addWorkout(Workout *workout, int *workoutNum, WINDOW *menuWin) {
     strtok(workout[*workoutNum].date, " \t\n");
     wrefresh(menuWin);
     (*workoutNum)++;
+
     return;
 }
 
@@ -316,66 +317,46 @@ void saveWorkoutsToFile(Workout *workouts, int length, const char *directory) {
     char filePath[100];
     sprintf(filePath, "%s", directory);
 
-    file = fopen(filePath, "a+");
+    // Read existing workouts from the file
+    file = fopen(filePath, "r");
+    Workout existingWorkouts[MAX_WORKOUTS];
+    char line[256];
+    int existingLength = 0;
+    if (file != NULL) {
+        while (fgets(line, sizeof(line), file) != NULL && existingLength < MAX_WORKOUTS) {
+            sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
+                   existingWorkouts[existingLength].date, existingWorkouts[existingLength].time,
+                   &existingWorkouts[existingLength].duration, existingWorkouts[existingLength].training);
+            existingLength++;
+        }
+        fclose(file);
+    }
+
+    // Add the new entry to the existing workouts array
+    existingWorkouts[existingLength] = workouts[length - 1];
+    existingLength++;
+
+    // Sort the workouts by date
+    qsort(existingWorkouts, existingLength, sizeof(Workout), compareByDate);
+
+    // Open the file in write mode to overwrite the existing content
+    file = fopen(filePath, "w");
     if (file == NULL) {
         printf("Failed to open file for writing.\n");
         return;
     }
 
-    // Write the sorted workouts to the file
-    for (int i = 0; i < length; i++) {
+    // Write the sorted workouts, including the new entry, to the file
+    for (int i = 0; i < existingLength; i++) {
         int workoutNumber = i + 1;
         fprintf(file, "%d Date: %s, Time: %s, Duration: %d, Training: %s\n",
-                workoutNumber, workouts[i].date, workouts[i].time,
-                workouts[i].duration, workouts[i].training);
+                workoutNumber, existingWorkouts[i].date, existingWorkouts[i].time,
+                existingWorkouts[i].duration, existingWorkouts[i].training);
     }
 
     fclose(file);
     printf("Workouts saved to file.\n");
 }
-
-void orderFileByDate(const char *directory) {
-    FILE *file;
-    char filePath[100];
-    sprintf(filePath, "%s", directory);
-    
-    file = fopen(filePath, "r+");
-    if (file == NULL) {
-        printf("Failed to open file for reading and writing.\n");
-        return;
-    }
-
-    char line[256];
-    Workout workouts[100];  // Assuming a maximum of 100 workouts
-
-    int i = 0;
-    while (fgets(line, sizeof(line), file) != NULL) {
-        sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
-               workouts[i].date, workouts[i].time, &workouts[i].duration, workouts[i].training);
-        i++;
-    }
-
-    int numWorkouts = i;
-    qsort(workouts, numWorkouts, sizeof(Workout), compareByDate);
-
-    fseek(file, 0, SEEK_SET);
-
-    for (i = 0; i < numWorkouts; i++) {
-        int workoutNumber = i + 1;
-        fprintf(file, "%d Date: %s, Time: %s, Duration: %d, Training: %s\n",
-                workoutNumber, workouts[i].date, workouts[i].time,
-                workouts[i].duration, workouts[i].training);
-    }
-
-    int truncateResult = ftruncate(fileno(file), ftell(file));
-    if (truncateResult != 0) {
-        printf("Failed to truncate the file.\n");
-    }
-
-    fclose(file);
-    printf("Workouts sorted and saved to workouts.txt.\n");
-}
-
 
 int main(void) {
     Workout workout1[MAX_WORKOUTS];
@@ -422,7 +403,6 @@ int main(void) {
             case 1:
                 addWorkout(workout1, &workoutNum, menuWin);
                 saveWorkoutsToFile(workout1, workoutNum, directory);
-                orderFileByDate(directory);
                 break;
             case 2:
                 displayWorkouts(menuWin, directory);
