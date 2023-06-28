@@ -332,21 +332,17 @@ void saveWorkoutsToFile(Workout *workouts, int length, const char *directory) {
         fclose(file);
     }
 
-    // Add the new entry to the existing workouts array
     existingWorkouts[existingLength] = workouts[length - 1];
     existingLength++;
 
-    // Sort the workouts by date
     qsort(existingWorkouts, existingLength, sizeof(Workout), compareByDate);
 
-    // Open the file in write mode to overwrite the existing content
     file = fopen(filePath, "w");
     if (file == NULL) {
         printf("Failed to open file for writing.\n");
         return;
     }
 
-    // Write the sorted workouts, including the new entry, to the file
     for (int i = 0; i < existingLength; i++) {
         int workoutNumber = i + 1;
         fprintf(file, "%d Date: %s, Time: %s, Duration: %d, Training: %s\n",
@@ -362,7 +358,7 @@ int main(void) {
     Workout workout1[MAX_WORKOUTS];
     int workoutNum = 0;
 
-    initscr();  // Initialize the ncurses library
+    initscr();
     keypad(stdscr, TRUE);
 
     welcomeScreen();
@@ -379,21 +375,19 @@ int main(void) {
         fclose(configFile);
     }
 
-
     int choice;
     while (1) {
         clear();
         mvprintw(0, 0, "ALLENO-ORA (TRAIN NOW)");
-        // making a window for the menu
+
         int terminalWidth, terminalHeight;
-        getmaxyx(stdscr, terminalHeight, terminalWidth); // Get terminal dimensions
+        getmaxyx(stdscr, terminalHeight, terminalWidth);
 
         int windowHeight = terminalHeight - WINDOW_MARGIN;
         int windowWidth = terminalWidth - WINDOW_MARGIN;
 
-        // Create a new window with the calculated dimensions and position
         WINDOW *menuWin = newwin(windowHeight, windowWidth, WINDOW_MARGIN, WINDOW_MARGIN);
-        box(menuWin, 0, 0); // Draw solid borders around the window
+        box(menuWin, 0, 0);
         refresh();
         wrefresh(menuWin);
 
