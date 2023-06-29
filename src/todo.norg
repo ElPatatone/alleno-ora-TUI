@@ -19,9 +19,9 @@
     The data will be stored locally on the text file so maybe I could use the data for some future NN model application trained on my data just for fun.
 
 ** TODO
+   - ( ) add ability to remove workouts from the list
    - ( ) improve the ui look for the program
    - ( ) add option to input the information for different lifts for the various workouts
-   - ( ) add ability to remove workouts from the list
 
 *** EXTRA
     - ( ) add ability to sort by most time spent, earliest or latest workout.

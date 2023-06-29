@@ -29,26 +29,26 @@ void center(char *title) {
     refresh();
 }
 
-void invalidInput(const char *errorMessage, WINDOW *menuWin) {
-    wclear(menuWin);
-    box(menuWin, 0,0);
+void invalid_input(const char *error_message, WINDOW *menu_window) {
+    wclear(menu_window);
+    box(menu_window, 0,0);
 
-    wattron(menuWin, A_BOLD);
-    mvwprintw(menuWin, 1, 1, "Error");
-    mvwprintw(menuWin, 2, 1, "%s", errorMessage);
-    mvwprintw(menuWin, 4, 1, "Press any key to continue...");
-    wattroff(menuWin, A_BOLD);
+    wattron(menu_window, A_BOLD);
+    mvwprintw(menu_window, 1, 1, "Error");
+    mvwprintw(menu_window, 2, 1, "%s", error_message);
+    mvwprintw(menu_window, 4, 1, "Press any key to continue...");
+    wattroff(menu_window, A_BOLD);
 
-    wrefresh(menuWin);
+    wrefresh(menu_window);
     noecho();
     getch();
     while (getch() != '\n') {
     }
     echo();
-    wclear(menuWin);
+    wclear(menu_window);
 }
 
-void welcomeScreen() {
+void welcome_screen() {
     attron(A_BOLD);
     center("Ready to lift some weights?");
     attroff(A_BOLD);
@@ -57,113 +57,113 @@ void welcomeScreen() {
     return;
 }
 
-void addWorkout(Workout *workout, int *workoutNum, WINDOW *menuWin) {
-    wclear(menuWin);
-    box(menuWin, 0, 0);
+void add_workout(Workout *workout, int *workout_number, WINDOW *menu_window) {
+    wclear(menu_window);
+    box(menu_window, 0, 0);
 
     while (1) {
-        box(menuWin, 0, 0);
-        mvwprintw(menuWin, 1, 2, "Add Workout");
-        mvwprintw(menuWin, 2, 2, "Date (DD/MM/YYYY): ");
-        wrefresh(menuWin);
+        box(menu_window, 0, 0);
+        mvwprintw(menu_window, 1, 2, "Add Workout");
+        mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): ");
+        wrefresh(menu_window);
 
-        wmove(menuWin, 2, 21); // Set the cursor position
-        wrefresh(menuWin);
-        wgetnstr(menuWin, workout[*workoutNum].date, sizeof(workout[*workoutNum].date));
+        wmove(menu_window, 2, 21); // Set the cursor position
+        wrefresh(menu_window);
+        wgetnstr(menu_window, workout[*workout_number].date, sizeof(workout[*workout_number].date));
 
         // Check if date is in the format "DD/MM/YYYY"
         int day, month, year;
-        if (sscanf(workout[*workoutNum].date, "%d/%d/%d", &day, &month, &year) != 3) {
-            invalidInput("Invalid date format. Please use the format DD/MM/YYYY.", menuWin);
+        if (sscanf(workout[*workout_number].date, "%d/%d/%d", &day, &month, &year) != 3) {
+            invalid_input("Invalid date format. Please use the format DD/MM/YYYY.", menu_window);
         } else {
             if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
-                invalidInput("Invalid date. Please enter a valid date.", menuWin);
+                invalid_input("Invalid date. Please enter a valid date.", menu_window);
             } else {
                 break;
             }
         }
     }
-    wrefresh(menuWin);
+    wrefresh(menu_window);
 
     int iteration1 = 1;
     while (1) {
-        box(menuWin, 0, 0);
+        box(menu_window, 0, 0);
 
         if (iteration1 > 1) {
-            mvwprintw(menuWin, 1, 2, "Add Workout");
-            mvwprintw(menuWin, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workoutNum].date);
-            mvwprintw(menuWin, 3, 2, "Time (HH:MM): ");
+            mvwprintw(menu_window, 1, 2, "Add Workout");
+            mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 3, 2, "Time (HH:MM): ");
         } else {
-            mvwprintw(menuWin, 3, 2, "Time (HH:MM): ");
+            mvwprintw(menu_window, 3, 2, "Time (HH:MM): ");
         }
 
-        wrefresh(menuWin);
-        wgetnstr(menuWin, workout[*workoutNum].time, sizeof(workout[*workoutNum].time));
+        wrefresh(menu_window);
+        wgetnstr(menu_window, workout[*workout_number].time, sizeof(workout[*workout_number].time));
 
         // Check if time is in the format "HH:MM"
         int hour, minute;
-        if (sscanf(workout[*workoutNum].time, "%d:%d", &hour, &minute) != 2) {
-            invalidInput("Invalid time format. Please use the format HH:MM.", menuWin);
+        if (sscanf(workout[*workout_number].time, "%d:%d", &hour, &minute) != 2) {
+            invalid_input("Invalid time format. Please use the format HH:MM.", menu_window);
             iteration1++;
         } else {
             if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                invalidInput("Invalid time. Please enter a valid time.", menuWin);
+                invalid_input("Invalid time. Please enter a valid time.", menu_window);
                 iteration1++;
             } else {
                 break;
             }
         }
     }
-    wrefresh(menuWin);
+    wrefresh(menu_window);
 
     int iteration2 = 1;
     while (1) {
-        box(menuWin, 0, 0);
+        box(menu_window, 0, 0);
 
         if (iteration2 > 1) {
-            mvwprintw(menuWin, 1, 2, "Add Workout");
-            mvwprintw(menuWin, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workoutNum].date);
-            mvwprintw(menuWin, 3, 2, "Time (HH:MM): %s", workout[*workoutNum].time);
-            mvwprintw(menuWin, 4, 2, "Duration (minutes): ");
+            mvwprintw(menu_window, 1, 2, "Add Workout");
+            mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 3, 2, "Time (HH:MM): %s", workout[*workout_number].time);
+            mvwprintw(menu_window, 4, 2, "Duration (minutes): ");
         } else {
-            mvwprintw(menuWin, 4, 2, "Duration (minutes): ");
+            mvwprintw(menu_window, 4, 2, "Duration (minutes): ");
         }
 
-        wrefresh(menuWin);
-        char durationString[10];
-        wmove(menuWin, 4, 22); // Set the cursor position
-        wrefresh(menuWin);
-        wgetstr(menuWin, durationString);
-        sscanf(durationString, "%d", &workout[*workoutNum].duration);
+        wrefresh(menu_window);
+        char duration_string[10];
+        wmove(menu_window, 4, 22); // Set the cursor position
+        wrefresh(menu_window);
+        wgetstr(menu_window, duration_string);
+        sscanf(duration_string, "%d", &workout[*workout_number].duration);
 
-        if (workout[*workoutNum].duration <= 0) {
-            invalidInput("Invalid input for duration.", menuWin);
+        if (workout[*workout_number].duration <= 0) {
+            invalid_input("Invalid input for duration.", menu_window);
             iteration2++;
         } else {
             break;
         }
     }
-    wrefresh(menuWin);
+    wrefresh(menu_window);
 
     int iteration3 = 1;
     while (1) {
-        box(menuWin, 0, 0);
+        box(menu_window, 0, 0);
 
         if (iteration3 > 1) {
-            mvwprintw(menuWin, 1, 2, "Add Workout");
-            mvwprintw(menuWin, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workoutNum].date);
-            mvwprintw(menuWin, 3, 2, "Time (HH:MM): %s", workout[*workoutNum].time);
-            mvwprintw(menuWin, 4, 2, "Duration (minutes): %d", workout[*workoutNum].duration);
-            mvwprintw(menuWin, 5, 2, "Training done: ");
+            mvwprintw(menu_window, 1, 2, "Add Workout");
+            mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 3, 2, "Time (HH:MM): %s", workout[*workout_number].time);
+            mvwprintw(menu_window, 4, 2, "Duration (minutes): %d", workout[*workout_number].duration);
+            mvwprintw(menu_window, 5, 2, "Training done: ");
         } else {
-            mvwprintw(menuWin, 5, 2, "Training done: ");
+            mvwprintw(menu_window, 5, 2, "Training done: ");
         }
 
-        wrefresh(menuWin);
-        wgetnstr(menuWin, workout[*workoutNum].training, sizeof(workout[*workoutNum].training));
+        wrefresh(menu_window);
+        wgetnstr(menu_window, workout[*workout_number].training, sizeof(workout[*workout_number].training));
 
-        if (strlen(workout[*workoutNum].training) == 0) {
-            invalidInput("Training value cannot be empty. Please enter a valid training value.", menuWin);
+        if (strlen(workout[*workout_number].training) == 0) {
+            invalid_input("Training value cannot be empty. Please enter a valid training value.", menu_window);
             iteration3++;
         } else {
             break;
@@ -171,46 +171,46 @@ void addWorkout(Workout *workout, int *workoutNum, WINDOW *menuWin) {
     }
 
     // Remove the training value appended to the date value (No idea why this happens)
-    strtok(workout[*workoutNum].date, " \t\n");
-    wrefresh(menuWin);
-    (*workoutNum)++;
+    strtok(workout[*workout_number].date, " \t\n");
+    wrefresh(menu_window);
+    (*workout_number)++;
 
     return;
 }
 
-void displayWorkouts(WINDOW *menuWin, const char *directory) {
-    wclear(menuWin);
-    box(menuWin, 0, 0);
+void display_workouts(WINDOW *menu_window, const char *directory) {
+    wclear(menu_window);
+    box(menu_window, 0, 0);
 
     FILE *file;
-    char filePath[100];
-    sprintf(filePath, "%s", directory);
+    char file_path[100];
+    sprintf(file_path, "%s", directory);
 
-    file = fopen(filePath, "r");
+    file = fopen(file_path, "r");
     if (file == NULL) {
-        mvwprintw(menuWin, 2, 2, "No workouts found. Please add workouts first.");
-        wrefresh(menuWin);
+        mvwprintw(menu_window, 2, 2, "No workouts found. Please add workouts first.");
+        wrefresh(menu_window);
         getch();
         return;
     }
 
-    int maxRows, maxCols;
-    getmaxyx(menuWin, maxRows, maxCols);
+    int max_rows, max_columns;
+    getmaxyx(menu_window, max_rows, max_columns);
 
-    int topIndex = 0;  // Index of the topmost visible workout
-    int numVisibleRows = maxRows - 5;  // Adjust the number of visible rows as needed
+    int top_index = 0;  // Index of the topmost visible workout
+    int visible_rows = max_rows - 5;  // Adjust the number of visible rows as needed
 
     char line[256];
-    int workoutNumber = 0;
+    int workout_numberber = 0;
 
-    wattron(menuWin, A_BOLD);
-    mvwprintw(menuWin, 1, 2, "Displaying all workouts");
-    wattroff(menuWin, A_BOLD);
-    mvwhline(menuWin, 2, 1, ACS_HLINE, maxCols - 2);  // Top border
+    wattron(menu_window, A_BOLD);
+    mvwprintw(menu_window, 1, 2, "Displaying all workouts");
+    wattroff(menu_window, A_BOLD);
+    mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
     while (fgets(line, sizeof(line), file) != NULL) {
-        workoutNumber++;
-        if (workoutNumber <= topIndex)
+        workout_numberber++;
+        if (workout_numberber <= top_index)
             continue;
 
         // Parse the workout information from the line
@@ -219,66 +219,73 @@ void displayWorkouts(WINDOW *menuWin, const char *directory) {
         sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
                date, time, &duration, training);
 
-        mvwprintw(menuWin, workoutNumber - topIndex + 2, 2, "%d - Date: %s", workoutNumber, date);
-        mvwprintw(menuWin, workoutNumber - topIndex + 2, 25, "Time: %s", time);
-        mvwprintw(menuWin, workoutNumber - topIndex + 2, 40, "Duration: %d", duration);
-        mvwprintw(menuWin, workoutNumber - topIndex + 2, 55, "Training: %s", training);
+        mvwprintw(menu_window, workout_numberber - top_index + 2, 2, "%d - Date: %s", workout_numberber, date);
+        mvwprintw(menu_window, workout_numberber - top_index + 2, 25, "Time: %s", time);
+        mvwprintw(menu_window, workout_numberber - top_index + 2, 40, "Duration: %d", duration);
+        mvwprintw(menu_window, workout_numberber - top_index + 2, 55, "Training: %s", training);
 
-        if (workoutNumber >= topIndex + numVisibleRows)
+        if (workout_numberber >= top_index + visible_rows)
             break;
     }
 
     fclose(file);
 
-    if (workoutNumber > numVisibleRows) {
-        mvwprintw(menuWin, numVisibleRows + 3, 2, "Use UP/DOWN arrow keys to scroll");
+    if (workout_numberber > visible_rows) {
+        mvwprintw(menu_window, visible_rows + 3, 2, "Use UP/DOWN arrow keys to scroll");
     } else {
-        mvwprintw(menuWin, numVisibleRows + 3, 2, "Press any key to continue...");
+        mvwprintw(menu_window, visible_rows + 3, 2, "Press any key to continue...");
     }
 
-    wrefresh(menuWin);
+    wrefresh(menu_window);
     getch();
 }
 
-int displayMenu(int windowHeight, int windowWidth, WINDOW *menuWin){
+// void remove_workouts(){
+//
+// }
+
+int display_menu(int window_height, int window_width, WINDOW *menu_window){
 
     // Text to be centered
     const char* text1 = "1. Add Workout";
-    const char* text2 = "2. Display Workouts";
-    const char* text3 = "3. Exit";
-    const char* text4 = "4. help";
-    const char* text5 = "Enter your choice: ";
+    const char* text2 = "2. Remove Workout";
+    const char* text3 = "3. Display Workouts";
+    const char* text4 = "4. Exit";
+    const char* text5 = "5. help";
+    const char* text6 = "Enter your choice: ";
 
-    int numLines = 5; // Total number of lines of text
-    int textLength1 = strlen(text1);
-    int textLength2 = strlen(text2);
-    int textLength3 = strlen(text3);
-    int textLength4 = strlen(text4);
-    int textLength5 = strlen(text5);
+    int numLines = 6; // Total number of lines of text
+    int text_length_1 = strlen(text1);
+    int text_length_2 = strlen(text2);
+    int text_length_3 = strlen(text3);
+    int text_length_4 = strlen(text4);
+    int text_length_5 = strlen(text5);
+    int text_length_6 = strlen(text6);
 
-    int centerX = (windowWidth - textLength1) / 2; // Calculate the center position
-    int centerY = (windowHeight - numLines) / 2; // Calculate the center position
+    int centerX = (window_width - text_length_1) / 2; // Calculate the center position
+    int centerY = (window_height - numLines) / 2; // Calculate the center position
 
-    mvwprintw(menuWin, centerY, centerX, "%s", text1);
-    mvwprintw(menuWin, centerY + 1, centerX, "%s", text2);
-    mvwprintw(menuWin, centerY + 2, centerX, "%s", text3);
-    mvwprintw(menuWin, centerY + 3, centerX, "%s", text4);
-    mvwprintw(menuWin, centerY + 4, centerX, "%s", text5);
-    wrefresh(menuWin);
+    mvwprintw(menu_window, centerY, centerX, "%s", text1);
+    mvwprintw(menu_window, centerY + 1, centerX, "%s", text2);
+    mvwprintw(menu_window, centerY + 2, centerX, "%s", text3);
+    mvwprintw(menu_window, centerY + 3, centerX, "%s", text4);
+    mvwprintw(menu_window, centerY + 4, centerX, "%s", text5);
+    mvwprintw(menu_window, centerY + 5, centerX, "%s", text6);
+    wrefresh(menu_window);
 
     // resetting the cursor to be in the menu window
-    wmove(menuWin, centerY + 4, centerX + textLength5);
-    wrefresh(menuWin);
+    wmove(menu_window, centerY + 5, centerX + text_length_6);
+    wrefresh(menu_window);
 
-    char choiceString[10];
-    wgetstr(menuWin, choiceString);
-    int choice = atoi(choiceString);
+    char choice_string[10];
+    wgetstr(menu_window, choice_string);
+    int choice = atoi(choice_string);
 
-    wrefresh(menuWin);
+    wrefresh(menu_window);
     return choice;
 }
 
-int compareByDate(const void *a, const void *b) {
+int compare_date(const void *a, const void *b) {
     const Workout *workoutA = (const Workout *)a;
     const Workout *workoutB = (const Workout *)b;
 
@@ -312,42 +319,42 @@ int compareByDate(const void *a, const void *b) {
     return 0;
 }
 
-void saveWorkoutsToFile(Workout *workouts, int length, const char *directory) {
+void save_workouts_to_file(Workout *workouts, int length, const char *directory) {
     FILE *file;
-    char filePath[100];
-    sprintf(filePath, "%s", directory);
+    char file_path[100];
+    sprintf(file_path, "%s", directory);
 
-    // Read existing workouts from the file
-    file = fopen(filePath, "r");
-    Workout existingWorkouts[MAX_WORKOUTS];
+    // Read existing_ workouts from the file
+    file = fopen(file_path, "r");
+    Workout existing_workouts[MAX_WORKOUTS];
     char line[256];
-    int existingLength = 0;
+    int existing_length = 0;
     if (file != NULL) {
-        while (fgets(line, sizeof(line), file) != NULL && existingLength < MAX_WORKOUTS) {
+        while (fgets(line, sizeof(line), file) != NULL && existing_length < MAX_WORKOUTS) {
             sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
-                   existingWorkouts[existingLength].date, existingWorkouts[existingLength].time,
-                   &existingWorkouts[existingLength].duration, existingWorkouts[existingLength].training);
-            existingLength++;
+                   existing_workouts[existing_length].date, existing_workouts[existing_length].time,
+                   &existing_workouts[existing_length].duration, existing_workouts[existing_length].training);
+            existing_length++;
         }
         fclose(file);
     }
 
-    existingWorkouts[existingLength] = workouts[length - 1];
-    existingLength++;
+    existing_workouts[existing_length] = workouts[length - 1];
+    existing_length++;
 
-    qsort(existingWorkouts, existingLength, sizeof(Workout), compareByDate);
+    qsort(existing_workouts, existing_length, sizeof(Workout), compare_date);
 
-    file = fopen(filePath, "w");
+    file = fopen(file_path, "w");
     if (file == NULL) {
         printf("Failed to open file for writing.\n");
         return;
     }
 
-    for (int i = 0; i < existingLength; i++) {
-        int workoutNumber = i + 1;
+    for (int i = 0; i < existing_length; i++) {
+        int workout_numberber = i + 1;
         fprintf(file, "%d Date: %s, Time: %s, Duration: %d, Training: %s\n",
-                workoutNumber, existingWorkouts[i].date, existingWorkouts[i].time,
-                existingWorkouts[i].duration, existingWorkouts[i].training);
+                workout_numberber, existing_workouts[i].date, existing_workouts[i].time,
+                existing_workouts[i].duration, existing_workouts[i].training);
     }
 
     fclose(file);
@@ -356,23 +363,23 @@ void saveWorkoutsToFile(Workout *workouts, int length, const char *directory) {
 
 int main(void) {
     Workout workout1[MAX_WORKOUTS];
-    int workoutNum = 0;
+    int workout_number = 0;
 
     initscr();
     keypad(stdscr, TRUE);
 
-    welcomeScreen();
+    welcome_screen();
 
-    FILE *configFile;
+    FILE *config_file;
     char directory[100] = "";
-    configFile = fopen("config.txt", "r");
-    if (configFile != NULL) {
-        fgets(directory, sizeof(directory), configFile);
+    config_file = fopen("config.txt", "r");
+    if (config_file != NULL) {
+        fgets(directory, sizeof(directory), config_file);
         // Remove newline character if present
         if (directory[strlen(directory) - 1] == '\n') {
             directory[strlen(directory) - 1] = '\0';
         }
-        fclose(configFile);
+        fclose(config_file);
     }
 
     int choice;
@@ -380,35 +387,36 @@ int main(void) {
         clear();
         mvprintw(0, 0, "ALLENO-ORA (TRAIN NOW)");
 
-        int terminalWidth, terminalHeight;
-        getmaxyx(stdscr, terminalHeight, terminalWidth);
+        int terminal_width, terminal_height;
+        getmaxyx(stdscr, terminal_height, terminal_width);
 
-        int windowHeight = terminalHeight - WINDOW_MARGIN;
-        int windowWidth = terminalWidth - WINDOW_MARGIN;
+        int window_height = terminal_height - WINDOW_MARGIN;
+        int window_width = terminal_width - WINDOW_MARGIN;
 
-        WINDOW *menuWin = newwin(windowHeight, windowWidth, WINDOW_MARGIN, WINDOW_MARGIN);
-        box(menuWin, 0, 0);
+        WINDOW *menu_window = newwin(window_height, window_width, WINDOW_MARGIN, WINDOW_MARGIN);
+        box(menu_window, 0, 0);
         refresh();
-        wrefresh(menuWin);
+        wrefresh(menu_window);
 
-        choice = displayMenu(windowHeight, windowWidth, menuWin);
+        choice = display_menu(window_height, window_width, menu_window);
 
         switch (choice) {
             case 1:
-                addWorkout(workout1, &workoutNum, menuWin);
-                saveWorkoutsToFile(workout1, workoutNum, directory);
+                add_workout(workout1, &workout_number, menu_window);
+                save_workouts_to_file(workout1, workout_number, directory);
                 break;
             case 2:
-                displayWorkouts(menuWin, directory);
                 break;
             case 3:
+                display_workouts(menu_window, directory);
+                break;
+            case 4:
                 endwin();
                 return 0;
             default:
-                invalidInput("Invalid choice, please try again.", menuWin);
+                invalid_input("Invalid choice, please try again.", menu_window);
                 break;
         }
     }
     return 0;
 }
-
