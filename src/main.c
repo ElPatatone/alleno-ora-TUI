@@ -240,9 +240,16 @@ void display_workouts(WINDOW *menu_window, const char *directory) {
     getch();
 }
 
-// void remove_workouts(){
-//
-// }
+void remove_workouts(Workout *workout, int *workout_number, WINDOW *menu_window, const char *directory){
+    wclear(menu_window);
+    box(menu_window, 0, 0);
+
+    wattron(menu_window, A_BOLD);
+    mvwprintw(menu_window, 1, 2, "Remove a workout");
+    wattroff(menu_window, A_BOLD);
+    wrefresh(menu_window);
+    getch();
+}
 
 int display_menu(int window_height, int window_width, WINDOW *menu_window){
 
@@ -406,6 +413,7 @@ int main(void) {
                 save_workouts_to_file(workout1, workout_number, directory);
                 break;
             case 2:
+                remove_workouts(workout1, &workout_number, menu_window, directory);
                 break;
             case 3:
                 display_workouts(menu_window, directory);

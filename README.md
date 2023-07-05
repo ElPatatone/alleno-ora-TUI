@@ -47,6 +47,7 @@ The program is still in developement and I have a lot of ideas I want to add, ex
 
 ## TODO
 
+- [ ] add ablity to remove workouts directly from the file.
 - [ ] Improve the UI as a lot of space is wasted.
 - [ ] Be able to store information on lifts done for a given workout.
 - [ ] Be able to see the stats, PRs for specific lifts.
