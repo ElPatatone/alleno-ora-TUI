@@ -1,0 +1,3 @@
+cmake -S ../src
+make
+
