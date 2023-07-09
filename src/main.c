@@ -17,6 +17,14 @@ typedef struct Workout {
 
 } Workout;
 
+typedef struct Lift {
+
+    char name[100];
+    int reps;
+    int sets;
+
+} Lift;
+
 void center(char *title) {
     int len, indent, rows, cols;
 
@@ -368,6 +376,17 @@ void save_workouts_to_file(Workout *workouts, int length, const char *directory)
     printf("Workouts saved to file.\n");
 }
 
+void help_menu(WINDOW *menu_window){
+    wclear(menu_window);
+    box(menu_window, 0, 0);
+
+    wattron(menu_window, A_BOLD);
+    mvwprintw(menu_window, 1, 2, "This is a manual for how to use this program.");
+    wattroff(menu_window, A_BOLD);
+    wrefresh(menu_window);
+    getch();
+}
+
 int main(void) {
     Workout workout1[MAX_WORKOUTS];
     int workout_number = 0;
@@ -420,6 +439,9 @@ int main(void) {
                 break;
             case 4:
                 endwin();
+                break;
+            case 5:
+                help_menu(menu_window);
                 return 0;
             default:
                 invalid_input("Invalid choice, please try again.", menu_window);
