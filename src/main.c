@@ -389,7 +389,7 @@ void help_menu(WINDOW *menu_window){
 }
 
 int initialize_database(sqlite3 **db) {
-    int rc = sqlite3_open(":memory:", db);  // Open an in-memory database
+    int rc = sqlite3_open("/home/elpatatone/Documents/alleno-ora/database/workouts.db", db);  // Open an in-memory database
     if (rc != SQLITE_OK) {
         printf("Cannot open database: %s\n", sqlite3_errmsg(*db));
         return rc;
@@ -488,10 +488,10 @@ int main(void) {
                 break;
             case 4:
                 endwin();
-                break;
+                return 0;
             case 5:
                 help_menu(menu_window);
-                return 0;
+                break;
             default:
                 invalid_input("Invalid choice, please try again.", menu_window);
                 break;
