@@ -439,10 +439,10 @@ int main(void) {
                 break;
             case 4:
                 endwin();
-                break;
+                return 0;
             case 5:
                 help_menu(menu_window);
-                return 0;
+                break;
             default:
                 invalid_input("Invalid choice, please try again.", menu_window);
                 break;

@@ -94,6 +94,7 @@ alleno: CMakeFiles/alleno.dir/main.c.o
 alleno: CMakeFiles/alleno.dir/build.make
 alleno: /usr/lib/x86_64-linux-gnu/libcurses.so
 alleno: /usr/lib/x86_64-linux-gnu/libform.so
+alleno: /usr/lib/x86_64-linux-gnu/libsqlite3.so
 alleno: CMakeFiles/alleno.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/elpatatone/Documents/alleno-ora/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking C executable alleno"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/alleno.dir/link.txt --verbose=$(VERBOSE)
