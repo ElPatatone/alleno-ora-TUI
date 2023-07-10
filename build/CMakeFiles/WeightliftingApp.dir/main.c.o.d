@@ -1,4 +1,4 @@
-CMakeFiles/alleno.dir/main.c.o: \
+CMakeFiles/WeightliftingApp.dir/main.c.o: \
  /home/elpatatone/Documents/alleno-ora/src/main.c \
  /usr/include/stdc-predef.h /usr/include/curses.h \
  /usr/include/ncurses_dll.h \

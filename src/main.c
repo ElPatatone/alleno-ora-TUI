@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sqlite3.h>
 
 #define MAX_WORKOUTS 365
 #define WINDOW_MARGIN 2
@@ -387,7 +388,55 @@ void help_menu(WINDOW *menu_window){
     getch();
 }
 
+int initialize_database(sqlite3 **db) {
+    int rc = sqlite3_open(":memory:", db);  // Open an in-memory database
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(*db));
+        return rc;
+    }
+
+    // Create the table for workouts
+    char *create_table_query = "CREATE TABLE workouts ("
+                               "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                               "date TEXT,"
+                               "time TEXT,"
+                               "duration INTEGER"
+                               ");";
+    rc = sqlite3_exec(*db, create_table_query, NULL, 0, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to create table: %s\n", sqlite3_errmsg(*db));
+        sqlite3_close(*db);
+        return rc;
+    }
+
+    // Create the table for lifts
+    char *create_lifts_table_query = "CREATE TABLE lifts ("
+                                     "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                     "workout_id INTEGER,"
+                                     "name TEXT,"
+                                     "weight INTEGER,"
+                                     "sets INTEGER,"
+                                     "reps INTEGER,"
+                                     "FOREIGN KEY(workout_id) REFERENCES workouts(id)"
+                                     ");";
+    rc = sqlite3_exec(*db, create_lifts_table_query, NULL, 0, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to create lifts table: %s\n", sqlite3_errmsg(*db));
+        sqlite3_close(*db);
+        return rc;
+    }
+
+    return SQLITE_OK;
+}
 int main(void) {
+
+    sqlite3 *db;
+    int rc = initialize_database(&db);
+
+    if (rc != SQLITE_OK) {
+        return rc;
+    }
+
     Workout workout1[MAX_WORKOUTS];
     int workout_number = 0;
 

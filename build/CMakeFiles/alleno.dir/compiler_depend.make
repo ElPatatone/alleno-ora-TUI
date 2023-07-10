@@ -75,7 +75,8 @@ CMakeFiles/alleno.dir/main.c.o: /home/elpatatone/Documents/alleno-ora/src/main.c
   /usr/include/x86_64-linux-gnu/bits/confname.h \
   /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
   /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
-  /usr/include/x86_64-linux-gnu/bits/unistd_ext.h
+  /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
+  /usr/include/sqlite3.h
 
 
 /usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
@@ -133,6 +134,8 @@ CMakeFiles/alleno.dir/main.c.o: /home/elpatatone/Documents/alleno-ora/src/main.c
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
+
+/usr/include/sqlite3.h:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 

@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /home/elpatatone/Documents/alleno-ora/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/alleno.dir/all
+all: CMakeFiles/WeightliftingApp.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/alleno.dir/clean
+clean: CMakeFiles/WeightliftingApp.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/alleno.dir
+# Target rules for target CMakeFiles/WeightliftingApp.dir
 
 # All Build rule for target.
-CMakeFiles/alleno.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpatatone/Documents/alleno-ora/build/CMakeFiles --progress-num=1,2 "Built target alleno"
-.PHONY : CMakeFiles/alleno.dir/all
+CMakeFiles/WeightliftingApp.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WeightliftingApp.dir/build.make CMakeFiles/WeightliftingApp.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WeightliftingApp.dir/build.make CMakeFiles/WeightliftingApp.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpatatone/Documents/alleno-ora/build/CMakeFiles --progress-num=1,2 "Built target WeightliftingApp"
+.PHONY : CMakeFiles/WeightliftingApp.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/alleno.dir/rule: cmake_check_build_system
+CMakeFiles/WeightliftingApp.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpatatone/Documents/alleno-ora/build/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/alleno.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/WeightliftingApp.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpatatone/Documents/alleno-ora/build/CMakeFiles 0
-.PHONY : CMakeFiles/alleno.dir/rule
+.PHONY : CMakeFiles/WeightliftingApp.dir/rule
 
 # Convenience name for target.
-alleno: CMakeFiles/alleno.dir/rule
-.PHONY : alleno
+WeightliftingApp: CMakeFiles/WeightliftingApp.dir/rule
+.PHONY : WeightliftingApp
 
 # clean rule for target.
-CMakeFiles/alleno.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/clean
-.PHONY : CMakeFiles/alleno.dir/clean
+CMakeFiles/WeightliftingApp.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WeightliftingApp.dir/build.make CMakeFiles/WeightliftingApp.dir/clean
+.PHONY : CMakeFiles/WeightliftingApp.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

@@ -117,24 +117,24 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named alleno
+# Target rules for targets named WeightliftingApp
 
 # Build rule for target.
-alleno: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 alleno
-.PHONY : alleno
+WeightliftingApp: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 WeightliftingApp
+.PHONY : WeightliftingApp
 
 # fast build rule for target.
-alleno/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/build
-.PHONY : alleno/fast
+WeightliftingApp/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WeightliftingApp.dir/build.make CMakeFiles/WeightliftingApp.dir/build
+.PHONY : WeightliftingApp/fast
 
 main.o: main.c.o
 .PHONY : main.o
 
 # target to build an object file
 main.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/main.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WeightliftingApp.dir/build.make CMakeFiles/WeightliftingApp.dir/main.c.o
 .PHONY : main.c.o
 
 main.i: main.c.i
@@ -142,7 +142,7 @@ main.i: main.c.i
 
 # target to preprocess a source file
 main.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/main.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WeightliftingApp.dir/build.make CMakeFiles/WeightliftingApp.dir/main.c.i
 .PHONY : main.c.i
 
 main.s: main.c.s
@@ -150,7 +150,7 @@ main.s: main.c.s
 
 # target to generate assembly for a file
 main.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/main.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/WeightliftingApp.dir/build.make CMakeFiles/WeightliftingApp.dir/main.c.s
 .PHONY : main.c.s
 
 # Help Target
@@ -161,7 +161,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... alleno"
+	@echo "... WeightliftingApp"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
