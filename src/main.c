@@ -210,7 +210,7 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
     return;
 }
 
-void display_workouts(sqlite3 *db, WINDOW *menu_window, const char *directory) {
+void display_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
@@ -236,7 +236,7 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window, const char *directory) {
     mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
     int ch;
-    while ((ch = getch()) != 27) {  // Exit on Escape key press (27 is the Escape key code)
+    do {
         wclear(menu_window);
         box(menu_window, 0, 0);
 
@@ -286,20 +286,55 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window, const char *directory) {
         }
 
         wrefresh(menu_window);
-    }
+    } while ((ch = getch()) != 27);  // Exit on Escape key press (27 is the Escape key code)
 
     sqlite3_finalize(stmt);
 }
 
-void remove_workouts(Workout *workout, int *workout_number, WINDOW *menu_window, const char *directory){
+void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
     wattron(menu_window, A_BOLD);
     mvwprintw(menu_window, 1, 2, "Remove a workout");
     wattroff(menu_window, A_BOLD);
+
+    mvwprintw(menu_window, 3, 2, "Enter the date of the workout to remove: ");
     wrefresh(menu_window);
-    getch();
+    wmove(menu_window, 3, 43); // Set the cursor position
+
+    char date[11];  // Buffer to store the date
+    mvwgetnstr(menu_window, 5, 2, date, sizeof(date));
+
+    // Prepare the DELETE statement
+    sqlite3_stmt *stmt;
+    char *delete_query = "DELETE FROM workouts WHERE date = ?";
+    int rc = sqlite3_prepare_v2(db, delete_query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to prepare DELETE statement: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    // Bind the date parameter
+    rc = sqlite3_bind_text(stmt, 1, date, -1, SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        printf("Failed to bind date parameter: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return;
+    }
+
+    // Execute the DELETE statement
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        printf("Failed to execute DELETE statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return;
+    }
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+
+    wrefresh(menu_window);
 }
 
 int display_menu(int window_height, int window_width, WINDOW *menu_window){
@@ -539,10 +574,10 @@ int main(void) {
                 save_workouts_to_file(workout1, workout_number, directory);
                 break;
             case 2:
-                remove_workouts(workout1, &workout_number, menu_window, directory);
+                remove_workouts(db, menu_window);
                 break;
             case 3:
-                display_workouts(db, menu_window, directory);
+                display_workouts(db, menu_window);
                 break;
             case 4:
                 endwin();
