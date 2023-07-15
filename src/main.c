@@ -235,34 +235,60 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window, const char *directory) {
     wattroff(menu_window, A_BOLD);
     mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
-    while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < top_index + visible_rows) {
-        workout_number++;
-        if (workout_number <= top_index)
-            continue;
+    int ch;
+    while ((ch = getch()) != 27) {  // Exit on Escape key press (27 is the Escape key code)
+        wclear(menu_window);
+        box(menu_window, 0, 0);
 
-        int id = sqlite3_column_int(stmt, 0);
-        const unsigned char *date = sqlite3_column_text(stmt, 1);
-        const unsigned char *time = sqlite3_column_text(stmt, 2);
-        int duration = sqlite3_column_int(stmt, 3);
-        const unsigned char *training = sqlite3_column_text(stmt, 4);
+        switch (ch) {
+            case KEY_UP:
+                top_index = (top_index > 0) ? top_index - 1 : 0;
+                break;
+            case KEY_DOWN:
+                if (workout_number >= visible_rows)
+                    top_index++;
+                break;
+            default:
+                break;
+        }
 
-        mvwprintw(menu_window, workout_number - top_index + 2, 2, "- Date: %s", date);
-        mvwprintw(menu_window, workout_number - top_index + 2, 25, "Time: %s", time);
-        mvwprintw(menu_window, workout_number - top_index + 2, 40, "Duration: %d", duration);
-        mvwprintw(menu_window, workout_number - top_index + 2, 55, "Training: %s", training);
-        if (workout_number >= top_index + visible_rows)
-            break;
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Displaying all workouts");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
+
+        workout_number = 0;
+        sqlite3_reset(stmt);  // Reset statement to re-execute the query
+
+        while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < top_index + visible_rows) {
+            workout_number++;
+            if (workout_number <= top_index)
+                continue;
+
+            int id = sqlite3_column_int(stmt, 0);
+            const unsigned char *date = sqlite3_column_text(stmt, 1);
+            const unsigned char *time = sqlite3_column_text(stmt, 2);
+            int duration = sqlite3_column_int(stmt, 3);
+            const unsigned char *training = sqlite3_column_text(stmt, 4);
+
+            mvwprintw(menu_window, workout_number - top_index + 2, 2, "- Date: %s", date);
+            mvwprintw(menu_window, workout_number - top_index + 2, 25, "Time: %s", time);
+            mvwprintw(menu_window, workout_number - top_index + 2, 40, "Duration: %d", duration);
+            mvwprintw(menu_window, workout_number - top_index + 2, 55, "Training: %s", training);
+            if (workout_number >= top_index + visible_rows)
+                break;
+        }
+
+        if (workout_number > visible_rows) {
+            mvwprintw(menu_window, visible_rows + 3, 2, "Use UP/DOWN arrow keys to scroll");
+        } else {
+            mvwprintw(menu_window, visible_rows + 3, 2, "Press Escape key to continue...");
+        }
+
+        wrefresh(menu_window);
     }
 
     sqlite3_finalize(stmt);
-    if (workout_number > visible_rows) {
-        mvwprintw(menu_window, visible_rows + 3, 2, "Use UP/DOWN arrow keys to scroll");
-    } else {
-        mvwprintw(menu_window, visible_rows + 3, 2, "Press any key to continue...");
-    }
-
-    wrefresh(menu_window);
-    getch();
 }
 
 void remove_workouts(Workout *workout, int *workout_number, WINDOW *menu_window, const char *directory){
