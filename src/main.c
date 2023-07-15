@@ -68,14 +68,22 @@ void welcome_screen() {
 }
 
 void insert_workout(sqlite3 *db, Workout *workout) {
-    char insert_query[150];
-    sprintf(insert_query, "INSERT INTO workouts (date, time, duration, training) VALUES ('%s', '%s', %d, '%s');",
+    char insert_query[300];
+    snprintf(insert_query, sizeof(insert_query), "INSERT INTO workouts (date, time, duration, training) VALUES ('%s', '%s', %d, '%s');",
             workout->date, workout->time, workout->duration, workout->training);
 
     char *error_message = NULL;
     int rc = sqlite3_exec(db, insert_query, 0, 0, &error_message);
     if (rc != SQLITE_OK) {
         printf("Failed to insert workout: %s\n", error_message);
+        sqlite3_free(error_message);
+    }
+
+    // Apply ORDER BY clause to retrieve data in the desired order
+    char *order_query = "SELECT * FROM workouts ORDER BY date DESC;";
+    rc = sqlite3_exec(db, order_query, 0, 0, &error_message);
+    if (rc != SQLITE_OK) {
+        printf("Failed to retrieve workouts: %s\n", error_message);
         sqlite3_free(error_message);
     }
 }
@@ -206,7 +214,7 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window, const char *directory) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
-    char *select_query = "SELECT id, date, time, duration, training FROM workouts;";
+    char *select_query = "SELECT * FROM workouts;";
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, select_query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
@@ -227,18 +235,23 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window, const char *directory) {
     wattroff(menu_window, A_BOLD);
     mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
-    while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < visible_rows) {
+    while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < top_index + visible_rows) {
         workout_number++;
+        if (workout_number <= top_index)
+            continue;
+
         int id = sqlite3_column_int(stmt, 0);
         const unsigned char *date = sqlite3_column_text(stmt, 1);
         const unsigned char *time = sqlite3_column_text(stmt, 2);
         int duration = sqlite3_column_int(stmt, 3);
         const unsigned char *training = sqlite3_column_text(stmt, 4);
 
-        mvwprintw(menu_window, workout_number + 2, 2, "%d - Date: %s", id, date);
-        mvwprintw(menu_window, workout_number + 2, 25, "Time: %s", time);
-        mvwprintw(menu_window, workout_number + 2, 40, "Duration: %d", duration);
-        mvwprintw(menu_window, workout_number + 2, 55, "Training: %s", training);
+        mvwprintw(menu_window, workout_number - top_index + 2, 2, "- Date: %s", date);
+        mvwprintw(menu_window, workout_number - top_index + 2, 25, "Time: %s", time);
+        mvwprintw(menu_window, workout_number - top_index + 2, 40, "Duration: %d", duration);
+        mvwprintw(menu_window, workout_number - top_index + 2, 55, "Training: %s", training);
+        if (workout_number >= top_index + visible_rows)
+            break;
     }
 
     sqlite3_finalize(stmt);
@@ -413,11 +426,11 @@ int initialize_database(sqlite3 **db) {
     // Create the table for workouts if the database doesn't exist
     if (!db_exists) {
         char *create_table_query = "CREATE TABLE workouts ("
-                                   "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                   "id INTEGER PRIMARY KEY,"
                                    "date TEXT,"
                                    "time TEXT,"
                                    "duration INTEGER,"
-                                   "training TEXT,"
+                                   "training TEXT"
                                    ");";
         rc = sqlite3_exec(*db, create_table_query, NULL, 0, NULL);
         if (rc != SQLITE_OK) {
