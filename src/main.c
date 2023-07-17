@@ -300,11 +300,11 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
     wattroff(menu_window, A_BOLD);
 
     mvwprintw(menu_window, 3, 2, "Enter the date of the workout to remove: ");
-    wrefresh(menu_window);
     wmove(menu_window, 3, 43); // Set the cursor position
+    wrefresh(menu_window);
 
     char date[11];  // Buffer to store the date
-    mvwgetnstr(menu_window, 5, 2, date, sizeof(date));
+    wgetnstr(menu_window, date, sizeof(date));
 
     // Prepare the DELETE statement
     sqlite3_stmt *stmt;
