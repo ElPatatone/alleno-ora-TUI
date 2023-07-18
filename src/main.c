@@ -293,45 +293,30 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
 
 void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
-    box(menu_window, 0, 0);
-
-    wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "Remove a workout");
-    wattroff(menu_window, A_BOLD);
-
-    mvwprintw(menu_window, 3, 2, "Enter the date of the workout to remove: ");
-    wmove(menu_window, 3, 43); // Set the cursor position
-    wrefresh(menu_window);
 
     char date[11];  // Buffer to store the date
-    echo();  // Enable input echoing
-    curs_set(1);  // Show the cursor
-
     int ch;
-    do {
-        if ((ch = getch()) == 27) {  // If Escape key is pressed
-            return;  // Exit the function
-        } else {
-            mvwgetnstr(menu_window, 5, 2, date, sizeof(date));
 
-            // Check if date is in the format "DD/MM/YYYY"
-            int day, month, year;
-            if (sscanf(date, "%d/%d/%d", &day, &month, &year) != 3 ||
-                day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
-                invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
-                wclear(menu_window);
-                box(menu_window, 0, 0);
-                wattron(menu_window, A_BOLD);
-                mvwprintw(menu_window, 1, 2, "Remove a workout");
-                wattroff(menu_window, A_BOLD);
-                mvwprintw(menu_window, 3, 2, "Enter the date of the workout to remove: ");
-                wmove(menu_window, 3, 43); // Set the cursor position
-                wrefresh(menu_window);
-            } else {
-                break;
-            }
+    while(1){
+        box(menu_window, 0, 0);
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Remove a workout");
+        wattroff(menu_window, A_BOLD);
+
+        mvwprintw(menu_window, 3, 2, "Enter the date of the workout to remove: ");
+        wmove(menu_window, 3, 43); // Set the cursor position
+        wrefresh(menu_window);
+        mvwgetnstr(menu_window, 3, 43, date, sizeof(date));
+
+        // Check if date is in the format "DD/MM/YYYY"
+        int day, month, year;
+        if (sscanf(date, "%d/%d/%d", &day, &month, &year) != 3 ||
+            day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
+            invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
+            return;
         }
-    } while (1);
+    }
 
     // Prepare the DELETE statement
     sqlite3_stmt *stmt;
@@ -340,6 +325,7 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
     if (rc != SQLITE_OK) {
         printf("Failed to prepare DELETE statement: %s\n", sqlite3_errmsg(db));
         curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
         return;
     }
 
@@ -349,6 +335,7 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
         printf("Failed to bind date parameter: %s\n", sqlite3_errmsg(db));
         sqlite3_finalize(stmt);
         curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
         return;
     }
 
@@ -358,13 +345,12 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
         printf("Failed to execute DELETE statement: %s\n", sqlite3_errmsg(db));
         sqlite3_finalize(stmt);
         curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
         return;
     }
 
     // Finalize the statement
     sqlite3_finalize(stmt);
-
-    mvwprintw(menu_window, 7, 2, "Deleted workout with date: %s", date);
     wrefresh(menu_window);
 }
 
