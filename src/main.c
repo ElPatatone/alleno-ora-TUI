@@ -93,11 +93,15 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
 
     while (1) {
         box(menu_window, 0, 0);
+        wattron(menu_window, A_BOLD);
         mvwprintw(menu_window, 1, 2, "Add Workout");
-        mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): ");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+        mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): ");
         wrefresh(menu_window);
 
-        wmove(menu_window, 2, 21); // Set the cursor position
+        wmove(menu_window, 3, 21); // Set the cursor position
         wrefresh(menu_window);
         wgetnstr(menu_window, workout[*workout_number].date, sizeof(workout[*workout_number].date));
 
@@ -120,11 +124,15 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
         box(menu_window, 0, 0);
 
         if (iteration1 > 1) {
+            wattron(menu_window, A_BOLD);
             mvwprintw(menu_window, 1, 2, "Add Workout");
-            mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
-            mvwprintw(menu_window, 3, 2, "Time (HH:MM): ");
+            wattroff(menu_window, A_BOLD);
+            mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+            mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): ");
         } else {
-            mvwprintw(menu_window, 3, 2, "Time (HH:MM): ");
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): ");
         }
 
         wrefresh(menu_window);
@@ -151,17 +159,21 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
         box(menu_window, 0, 0);
 
         if (iteration2 > 1) {
+            wattron(menu_window, A_BOLD);
             mvwprintw(menu_window, 1, 2, "Add Workout");
-            mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
-            mvwprintw(menu_window, 3, 2, "Time (HH:MM): %s", workout[*workout_number].time);
-            mvwprintw(menu_window, 4, 2, "Duration (minutes): ");
+            wattroff(menu_window, A_BOLD);
+            mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+            mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout[*workout_number].time);
+            mvwprintw(menu_window, 5, 2, "Duration (minutes): ");
         } else {
-            mvwprintw(menu_window, 4, 2, "Duration (minutes): ");
+            mvwprintw(menu_window, 5, 2, "Duration (minutes): ");
         }
 
         wrefresh(menu_window);
         char duration_string[10];
-        wmove(menu_window, 4, 22); // Set the cursor position
+        wmove(menu_window, 5, 22); // Set the cursor position
         wrefresh(menu_window);
         wgetstr(menu_window, duration_string);
         sscanf(duration_string, "%d", &workout[*workout_number].duration);
@@ -180,13 +192,17 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
         box(menu_window, 0, 0);
 
         if (iteration3 > 1) {
+            wattron(menu_window, A_BOLD);
             mvwprintw(menu_window, 1, 2, "Add Workout");
-            mvwprintw(menu_window, 2, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
-            mvwprintw(menu_window, 3, 2, "Time (HH:MM): %s", workout[*workout_number].time);
-            mvwprintw(menu_window, 4, 2, "Duration (minutes): %d", workout[*workout_number].duration);
-            mvwprintw(menu_window, 5, 2, "Training done: ");
+            wattroff(menu_window, A_BOLD);
+            mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+            mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout[*workout_number].time);
+            mvwprintw(menu_window, 5, 2, "Duration (minutes): %d", workout[*workout_number].duration);
+            mvwprintw(menu_window, 6, 2, "Training done: ");
         } else {
-            mvwprintw(menu_window, 5, 2, "Training done: ");
+            mvwprintw(menu_window, 6, 2, "Training done: ");
         }
 
         wrefresh(menu_window);
@@ -220,6 +236,7 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
         printf("Failed to execute select query: %s\n", sqlite3_errmsg(db));
         return;
     }
+
     int max_rows, max_columns;
     getmaxyx(menu_window, max_rows, max_columns);
 
@@ -230,7 +247,7 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
     int workout_number = 0;
 
     wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "Displaying all workouts");
+    mvwprintw(menu_window, 1, 2, "Display Workouts");
     wattroff(menu_window, A_BOLD);
     mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
@@ -302,6 +319,7 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
         wattron(menu_window, A_BOLD);
         mvwprintw(menu_window, 1, 2, "Remove a workout");
         wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
         mvwprintw(menu_window, 3, 2, "Enter the date of the workout to remove: ");
         wmove(menu_window, 3, 43); // Set the cursor position
@@ -668,7 +686,7 @@ int main(void) {
                 help_menu(menu_window);
                 break;
             default:
-                invalid_input("Invalid choice, please try again.", menu_window);
+                invalid_input("Invalid choice, try again.", menu_window);
                 break;
         }
     }
