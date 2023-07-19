@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sqlite3.h>
+#include <stdbool.h>
 
 #define MAX_WORKOUTS 365
 #define WINDOW_MARGIN 2
@@ -49,7 +51,6 @@ void invalid_input(const char *error_message, WINDOW *menu_window) {
 
     wrefresh(menu_window);
     noecho();
-    getch();
     while (getch() != '\n') {
     }
     echo();
@@ -65,7 +66,28 @@ void welcome_screen() {
     return;
 }
 
-void add_workout(Workout *workout, int *workout_number, WINDOW *menu_window) {
+void insert_workout(sqlite3 *db, Workout *workout) {
+    char insert_query[300];
+    snprintf(insert_query, sizeof(insert_query), "INSERT INTO workouts (date, time, duration, training) VALUES ('%s', '%s', %d, '%s');",
+            workout->date, workout->time, workout->duration, workout->training);
+
+    char *error_message = NULL;
+    int rc = sqlite3_exec(db, insert_query, 0, 0, &error_message);
+    if (rc != SQLITE_OK) {
+        printf("Failed to insert workout: %s\n", error_message);
+        sqlite3_free(error_message);
+    }
+
+    // Apply ORDER BY clause to retrieve data in the desired order
+    char *order_query = "SELECT * FROM workouts ORDER BY date DESC;";
+    rc = sqlite3_exec(db, order_query, 0, 0, &error_message);
+    if (rc != SQLITE_OK) {
+        printf("Failed to retrieve workouts: %s\n", error_message);
+        sqlite3_free(error_message);
+    }
+}
+
+void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
@@ -183,25 +205,21 @@ void add_workout(Workout *workout, int *workout_number, WINDOW *menu_window) {
     wrefresh(menu_window);
     (*workout_number)++;
 
+    insert_workout(db, &workout[*workout_number - 1]);
     return;
 }
 
-void display_workouts(WINDOW *menu_window, const char *directory) {
+void display_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
-    FILE *file;
-    char file_path[100];
-    sprintf(file_path, "%s", directory);
-
-    file = fopen(file_path, "r");
-    if (file == NULL) {
-        mvwprintw(menu_window, 2, 2, "No workouts found. Please add workouts first.");
-        wrefresh(menu_window);
-        getch();
+    char *select_query = "SELECT * FROM workouts;";
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, select_query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to execute select query: %s\n", sqlite3_errmsg(db));
         return;
     }
-
     int max_rows, max_columns;
     getmaxyx(menu_window, max_rows, max_columns);
 
@@ -209,54 +227,132 @@ void display_workouts(WINDOW *menu_window, const char *directory) {
     int visible_rows = max_rows - 5;  // Adjust the number of visible rows as needed
 
     char line[256];
-    int workout_numberber = 0;
+    int workout_number = 0;
 
     wattron(menu_window, A_BOLD);
     mvwprintw(menu_window, 1, 2, "Displaying all workouts");
     wattroff(menu_window, A_BOLD);
     mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
-    while (fgets(line, sizeof(line), file) != NULL) {
-        workout_numberber++;
-        if (workout_numberber <= top_index)
-            continue;
+    int ch;
+    do {
+        wclear(menu_window);
+        box(menu_window, 0, 0);
 
-        // Parse the workout information from the line
-        char date[15], time[15], training[100];
-        int duration;
-        sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
-               date, time, &duration, training);
+        switch (ch) {
+            case KEY_UP:
+                top_index = (top_index > 0) ? top_index - 1 : 0;
+                break;
+            case KEY_DOWN:
+                if (workout_number >= visible_rows)
+                    top_index++;
+                break;
+            default:
+                break;
+        }
 
-        mvwprintw(menu_window, workout_numberber - top_index + 2, 2, "%d - Date: %s", workout_numberber, date);
-        mvwprintw(menu_window, workout_numberber - top_index + 2, 25, "Time: %s", time);
-        mvwprintw(menu_window, workout_numberber - top_index + 2, 40, "Duration: %d", duration);
-        mvwprintw(menu_window, workout_numberber - top_index + 2, 55, "Training: %s", training);
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Displaying all workouts");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
-        if (workout_numberber >= top_index + visible_rows)
-            break;
-    }
+        workout_number = 0;
+        sqlite3_reset(stmt);  // Reset statement to re-execute the query
 
-    fclose(file);
+        while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < top_index + visible_rows) {
+            workout_number++;
+            if (workout_number <= top_index)
+                continue;
 
-    if (workout_numberber > visible_rows) {
-        mvwprintw(menu_window, visible_rows + 3, 2, "Use UP/DOWN arrow keys to scroll");
-    } else {
-        mvwprintw(menu_window, visible_rows + 3, 2, "Press any key to continue...");
-    }
+            int id = sqlite3_column_int(stmt, 0);
+            const unsigned char *date = sqlite3_column_text(stmt, 1);
+            const unsigned char *time = sqlite3_column_text(stmt, 2);
+            int duration = sqlite3_column_int(stmt, 3);
+            const unsigned char *training = sqlite3_column_text(stmt, 4);
 
-    wrefresh(menu_window);
-    getch();
+            mvwprintw(menu_window, workout_number - top_index + 2, 2, "- Date: %s", date);
+            mvwprintw(menu_window, workout_number - top_index + 2, 25, "Time: %s", time);
+            mvwprintw(menu_window, workout_number - top_index + 2, 40, "Duration: %d", duration);
+            mvwprintw(menu_window, workout_number - top_index + 2, 55, "Training: %s", training);
+            if (workout_number >= top_index + visible_rows)
+                break;
+        }
+
+        if (workout_number > visible_rows) {
+            mvwprintw(menu_window, visible_rows + 3, 2, "Use UP/DOWN arrow keys to scroll");
+        } else {
+            mvwprintw(menu_window, visible_rows + 3, 2, "Press Escape key to continue...");
+        }
+
+        wrefresh(menu_window);
+    } while ((ch = getch()) != 27);  // Exit on Escape key press (27 is the Escape key code)
+
+    sqlite3_finalize(stmt);
 }
 
-void remove_workouts(Workout *workout, int *workout_number, WINDOW *menu_window, const char *directory){
+void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
-    box(menu_window, 0, 0);
 
-    wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "Remove a workout");
-    wattroff(menu_window, A_BOLD);
+    char date[11];  // Buffer to store the date
+    int ch;
+
+    while(1){
+        box(menu_window, 0, 0);
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Remove a workout");
+        wattroff(menu_window, A_BOLD);
+
+        mvwprintw(menu_window, 3, 2, "Enter the date of the workout to remove: ");
+        wmove(menu_window, 3, 43); // Set the cursor position
+        wrefresh(menu_window);
+        mvwgetnstr(menu_window, 3, 43, date, sizeof(date));
+
+        // Check if date is in the format "DD/MM/YYYY"
+        int day, month, year;
+        if (sscanf(date, "%d/%d/%d", &day, &month, &year) != 3 ||
+            day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
+            invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
+            break;
+        }else {
+            break;
+        }
+    }
+
+    // Prepare the DELETE statement
+    sqlite3_stmt *stmt;
+    char *delete_query = "DELETE FROM workouts WHERE date = ?";
+    int rc = sqlite3_prepare_v2(db, delete_query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to prepare DELETE statement: %s\n", sqlite3_errmsg(db));
+        curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
+        return;
+    }
+
+    // Bind the date parameter
+    rc = sqlite3_bind_text(stmt, 1, date, -1, SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        printf("Failed to bind date parameter: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
+        return;
+    }
+
+    // Execute the DELETE statement
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        printf("Failed to execute DELETE statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
+        return;
+    }
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
     wrefresh(menu_window);
-    getch();
 }
 
 int display_menu(int window_height, int window_width, WINDOW *menu_window){
@@ -376,18 +472,146 @@ void save_workouts_to_file(Workout *workouts, int length, const char *directory)
     printf("Workouts saved to file.\n");
 }
 
-void help_menu(WINDOW *menu_window){
+void help_menu(WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
-    wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "This is a manual for how to use this program.");
-    wattroff(menu_window, A_BOLD);
-    wrefresh(menu_window);
-    getch();
+    int total_lines = 22; // Total number of lines in the help menu
+    int max_lines = LINES - 6; // Maximum lines that can be displayed in the window (excluding borders)
+
+    int start_line = 0;
+    int end_line = max_lines - 1;
+
+    const char *help_text[] = {
+        "Add Workout",
+        "This option allows you to insert a new workout entry. Currently it requires you to input", "the day, time, duration, and the training done for each workout entered.",
+        "Please input the fields in the following formats:",
+        "Date - DD/MM/YYYY - e.g. 25/07/2023",
+        "Time - HH:MM - e.g. 13:15",
+        "Duration - integer for minutes - e.g. 120",
+        "Training - string for training - e.g. pull",
+        "Disclaimer - This currently has no exit functionality",
+        " ",
+        "Remove Workout",
+        "This option allows you to remove a workout by entering the date it was done.",
+        "Please enter the date in the following format:",
+        "Date - DD/MM/YYYY - e.g. 25/07/2023",
+        "Disclaimer - Currently there is no exit functionality. You can just enter a wrong", "input, and the program will return to the option menu.",
+        " ",
+        "Display Workouts",
+        "This option allows you to see all the workouts you have registered in the program by", "reading the data from the workouts.db saved in the database folder."
+    };
+
+    int num_lines = sizeof(help_text) / sizeof(help_text[0]);
+    int ch;
+    do {
+        wclear(menu_window);
+        box(menu_window, 0, 0);
+
+        for (int i = 1; i < getmaxx(menu_window) - 1; ++i) {
+            mvwaddch(menu_window, 2, i, ACS_HLINE);
+        }
+
+        // Bold the first line (title) and print it one line above
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "This is a manual for how to use this program.");
+        wattroff(menu_window, A_BOLD);
+
+        for (int i = start_line; i < start_line + max_lines && i < num_lines; ++i) {
+            mvwprintw(menu_window, i - start_line + 3, 2, "%s", help_text[i]);
+        }
+
+        wrefresh(menu_window);
+        ch = getch();
+
+        // Handle scrolling
+        switch (ch) {
+            case KEY_UP:
+                if (start_line > 0) {
+                    start_line--;
+                }
+                break;
+            case KEY_DOWN:
+                if (end_line < num_lines - 1) {
+                    start_line++;
+                }
+                break;
+            default:
+                break;
+        }
+
+        end_line = start_line + max_lines - 1;
+        if (end_line >= num_lines) {
+            end_line = num_lines - 1;
+        }
+    } while (ch != 27); // Exit loop on pressing the escape key
+}
+
+bool database_exists(const char *path) {
+    FILE *file = fopen(path, "r");
+    if (file) {
+        fclose(file);
+        return true;
+    }
+    return false;
+}
+
+int initialize_database(sqlite3 **db) {
+    const char *database_path = "/home/elpatatone/Documents/alleno-ora/database/workouts.db";
+    bool db_exists = database_exists(database_path);
+    int rc = sqlite3_open(database_path, db);
+
+    if (rc != SQLITE_OK) {
+        printf("Cannot open database: %s\n", sqlite3_errmsg(*db));
+        return rc;
+    }
+
+    // Create the table for workouts if the database doesn't exist
+    if (!db_exists) {
+        char *create_table_query = "CREATE TABLE workouts ("
+                                   "id INTEGER PRIMARY KEY,"
+                                   "date TEXT,"
+                                   "time TEXT,"
+                                   "duration INTEGER,"
+                                   "training TEXT"
+                                   ");";
+        rc = sqlite3_exec(*db, create_table_query, NULL, 0, NULL);
+        if (rc != SQLITE_OK) {
+            printf("Failed to create table: %s\n", sqlite3_errmsg(*db));
+            sqlite3_close(*db);
+            return rc;
+        }
+
+        // Create the table for lifts
+        char *create_lifts_table_query = "CREATE TABLE lifts ("
+                                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                         "workout_id INTEGER,"
+                                         "name TEXT,"
+                                         "weight INTEGER,"
+                                         "sets INTEGER,"
+                                         "reps INTEGER,"
+                                         "FOREIGN KEY(workout_id) REFERENCES workouts(id)"
+                                         ");";
+        rc = sqlite3_exec(*db, create_lifts_table_query, NULL, 0, NULL);
+        if (rc != SQLITE_OK) {
+            printf("Failed to create lifts table: %s\n", sqlite3_errmsg(*db));
+            sqlite3_close(*db);
+            return rc;
+        }
+    }
+
+    return SQLITE_OK;
 }
 
 int main(void) {
+
+    sqlite3 *db;
+    int rc = initialize_database(&db);
+
+    if (rc != SQLITE_OK) {
+        return rc;
+    }
+
     Workout workout1[MAX_WORKOUTS];
     int workout_number = 0;
 
@@ -428,14 +652,14 @@ int main(void) {
 
         switch (choice) {
             case 1:
-                add_workout(workout1, &workout_number, menu_window);
+                add_workout(db, workout1, &workout_number, menu_window);
                 save_workouts_to_file(workout1, workout_number, directory);
                 break;
             case 2:
-                remove_workouts(workout1, &workout_number, menu_window, directory);
+                remove_workouts(db, menu_window);
                 break;
             case 3:
-                display_workouts(menu_window, directory);
+                display_workouts(db, menu_window);
                 break;
             case 4:
                 endwin();
