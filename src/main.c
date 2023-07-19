@@ -51,7 +51,6 @@ void invalid_input(const char *error_message, WINDOW *menu_window) {
 
     wrefresh(menu_window);
     noecho();
-    getch();
     while (getch() != '\n') {
     }
     echo();
@@ -314,7 +313,9 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
         if (sscanf(date, "%d/%d/%d", &day, &month, &year) != 3 ||
             day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
             invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
-            return;
+            break;
+        }else {
+            break;
         }
     }
 
@@ -471,15 +472,79 @@ void save_workouts_to_file(Workout *workouts, int length, const char *directory)
     printf("Workouts saved to file.\n");
 }
 
-void help_menu(WINDOW *menu_window){
+void help_menu(WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
-    wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "This is a manual for how to use this program.");
-    wattroff(menu_window, A_BOLD);
-    wrefresh(menu_window);
-    getch();
+    int total_lines = 22; // Total number of lines in the help menu
+    int max_lines = LINES - 6; // Maximum lines that can be displayed in the window (excluding borders)
+
+    int start_line = 0;
+    int end_line = max_lines - 1;
+
+    const char *help_text[] = {
+        "Add Workout",
+        "This option allows you to insert a new workout entry. Currently it requires you to input", "the day, time, duration, and the training done for each workout entered.",
+        "Please input the fields in the following formats:",
+        "Date - DD/MM/YYYY - e.g. 25/07/2023",
+        "Time - HH:MM - e.g. 13:15",
+        "Duration - integer for minutes - e.g. 120",
+        "Training - string for training - e.g. pull",
+        "Disclaimer - This currently has no exit functionality",
+        " ",
+        "Remove Workout",
+        "This option allows you to remove a workout by entering the date it was done.",
+        "Please enter the date in the following format:",
+        "Date - DD/MM/YYYY - e.g. 25/07/2023",
+        "Disclaimer - Currently there is no exit functionality. You can just enter a wrong", "input, and the program will return to the option menu.",
+        " ",
+        "Display Workouts",
+        "This option allows you to see all the workouts you have registered in the program by", "reading the data from the workouts.db saved in the database folder."
+    };
+
+    int num_lines = sizeof(help_text) / sizeof(help_text[0]);
+    int ch;
+    do {
+        wclear(menu_window);
+        box(menu_window, 0, 0);
+
+        for (int i = 1; i < getmaxx(menu_window) - 1; ++i) {
+            mvwaddch(menu_window, 2, i, ACS_HLINE);
+        }
+
+        // Bold the first line (title) and print it one line above
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "This is a manual for how to use this program.");
+        wattroff(menu_window, A_BOLD);
+
+        for (int i = start_line; i < start_line + max_lines && i < num_lines; ++i) {
+            mvwprintw(menu_window, i - start_line + 3, 2, "%s", help_text[i]);
+        }
+
+        wrefresh(menu_window);
+        ch = getch();
+
+        // Handle scrolling
+        switch (ch) {
+            case KEY_UP:
+                if (start_line > 0) {
+                    start_line--;
+                }
+                break;
+            case KEY_DOWN:
+                if (end_line < num_lines - 1) {
+                    start_line++;
+                }
+                break;
+            default:
+                break;
+        }
+
+        end_line = start_line + max_lines - 1;
+        if (end_line >= num_lines) {
+            end_line = num_lines - 1;
+        }
+    } while (ch != 27); // Exit loop on pressing the escape key
 }
 
 bool database_exists(const char *path) {
