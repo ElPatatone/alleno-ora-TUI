@@ -67,6 +67,8 @@ void welcome_screen() {
 }
 
 void insert_workout(sqlite3 *db, Workout *workout) {
+
+
     char insert_query[300];
     snprintf(insert_query, sizeof(insert_query), "INSERT INTO workouts (date, time, duration, training) VALUES ('%s', '%s', %d, '%s');",
             workout->date, workout->time, workout->duration, workout->training);
@@ -225,11 +227,12 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
     return;
 }
 
+
 void display_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
 
-    char *select_query = "SELECT * FROM workouts;";
+    char *select_query = "SELECT * FROM workouts ORDER BY date DESC;";
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, select_query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
