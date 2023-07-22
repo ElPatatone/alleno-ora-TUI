@@ -78,8 +78,4 @@ CMakeFiles/alleno.dir/main.c.o
  /usr/include/x86_64-linux-gnu/bits/getopt_core.h
  /usr/include/x86_64-linux-gnu/bits/unistd_ext.h
  /usr/include/sqlite3.h
- /usr/include/time.h
- /usr/include/x86_64-linux-gnu/bits/time.h
- /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h
- /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h
 

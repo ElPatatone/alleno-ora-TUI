@@ -100,17 +100,16 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
         wattroff(menu_window, A_BOLD);
         mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-        mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): ");
+        mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): ");
         wrefresh(menu_window);
 
         wmove(menu_window, 3, 21); // Set the cursor position
         wrefresh(menu_window);
         wgetnstr(menu_window, workout[*workout_number].date, sizeof(workout[*workout_number].date));
 
-        // Check if date is in the format "DD/MM/YYYY"
-        int day, month, year;
-        if (sscanf(workout[*workout_number].date, "%d/%d/%d", &day, &month, &year) != 3) {
-            invalid_input("Invalid date format. Please use the format DD/MM/YYYY.", menu_window);
+        int year, month, day;
+        if (sscanf(workout[*workout_number].date, "%d/%d/%d", &year, &month, &day) != 3) {
+            invalid_input("Invalid date format. Please use the format YYYY/MM/DD.", menu_window);
         } else {
             if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
                 invalid_input("Invalid date. Please enter a valid date.", menu_window);
@@ -131,7 +130,7 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
             wattroff(menu_window, A_BOLD);
             mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-            mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout[*workout_number].date);
             mvwprintw(menu_window, 4, 2, "Time (HH:MM): ");
         } else {
             mvwprintw(menu_window, 4, 2, "Time (HH:MM): ");
@@ -166,7 +165,7 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
             wattroff(menu_window, A_BOLD);
             mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-            mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout[*workout_number].date);
             mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout[*workout_number].time);
             mvwprintw(menu_window, 5, 2, "Duration (minutes): ");
         } else {
@@ -199,7 +198,7 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
             wattroff(menu_window, A_BOLD);
             mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-            mvwprintw(menu_window, 3, 2, "Date (DD/MM/YYYY): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout[*workout_number].date);
             mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout[*workout_number].time);
             mvwprintw(menu_window, 5, 2, "Duration (minutes): %d", workout[*workout_number].duration);
             mvwprintw(menu_window, 6, 2, "Training done: ");
@@ -329,9 +328,8 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
         wrefresh(menu_window);
         mvwgetnstr(menu_window, 3, 43, date, sizeof(date));
 
-        // Check if date is in the format "DD/MM/YYYY"
-        int day, month, year;
-        if (sscanf(date, "%d/%d/%d", &day, &month, &year) != 3 ||
+        int year, month, day;
+        if (sscanf(date, "%d/%d/%d", &year, &month, &day) != 3 ||
             day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
             invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
             break;
@@ -507,7 +505,7 @@ void help_menu(WINDOW *menu_window) {
         "Add Workout",
         "This option allows you to insert a new workout entry. Currently it requires you to input", "the day, time, duration, and the training done for each workout entered.",
         "Please input the fields in the following formats:",
-        "Date - DD/MM/YYYY - e.g. 25/07/2023",
+        "Date - YYYY/MM/DD - e.g. 25/07/2023",
         "Time - HH:MM - e.g. 13:15",
         "Duration - integer for minutes - e.g. 120",
         "Training - string for training - e.g. pull",
@@ -516,7 +514,7 @@ void help_menu(WINDOW *menu_window) {
         "Remove Workout",
         "This option allows you to remove a workout by entering the date it was done.",
         "Please enter the date in the following format:",
-        "Date - DD/MM/YYYY - e.g. 25/07/2023",
+        "Date - YYYY/MM/DD - e.g. 25/07/2023",
         "Disclaimer - Currently there is no exit functionality. You can just enter a wrong", "input, and the program will return to the option menu.",
         " ",
         "Display Workouts",
