@@ -8,16 +8,8 @@
 #include <stdbool.h>
 
 #define MAX_WORKOUTS 365
+#define MAX_LIFTS 10
 #define WINDOW_MARGIN 2
-
-typedef struct Workout {
-
-    char date[15];
-    char training[100];
-    char time[15];
-    int duration;
-
-} Workout;
 
 typedef struct Lift {
 
@@ -27,17 +19,17 @@ typedef struct Lift {
 
 } Lift;
 
-void center(char *title) {
-    int len, indent, rows, cols;
+typedef struct Workout {
 
-    getmaxyx(stdscr, rows, cols);
-    len = strlen(title);
-    indent = cols - len;
-    indent /= 2;
-    rows =  rows / 2 - 1;
-    mvaddstr(rows, indent, title);
-    refresh();
-}
+    char date[15];
+    char training[100];
+    char time[15];
+    int duration;
+    int number_of_lifts;
+    Lift lift[MAX_LIFTS];
+    Lift pr;
+
+} Workout;
 
 void invalid_input(const char *error_message, WINDOW *menu_window) {
     wclear(menu_window);
@@ -57,6 +49,52 @@ void invalid_input(const char *error_message, WINDOW *menu_window) {
     wclear(menu_window);
 }
 
+void add_pr(Workout *workout, sqlite3 *db, WINDOW *menu_window) {
+
+    wclear(menu_window);
+
+    char date[11];  // Buffer to store the date
+    int ch;
+
+    while(1){
+        box(menu_window, 0, 0);
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Add PR");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+        mvwprintw(menu_window, 3, 2, "Enter the date of the PR: ");
+        wmove(menu_window, 3, 28); // Set the cursor position
+        wrefresh(menu_window);
+        mvwgetnstr(menu_window, 3, 28, date, sizeof(date));
+
+        int year, month, day;
+        if (sscanf(date, "%d/%d/%d", &year, &month, &day) != 3 ||
+            day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
+            invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
+        }else {
+            break;
+        }
+    }
+
+    getch();
+
+}
+
+void center(char *title) {
+    int len, indent, rows, cols;
+
+    getmaxyx(stdscr, rows, cols);
+    len = strlen(title);
+    indent = cols - len;
+    indent /= 2;
+    rows =  rows / 2 - 1;
+    mvaddstr(rows, indent, title);
+    refresh();
+}
+
+
 void welcome_screen() {
     attron(A_BOLD);
     center("Ready to lift some weights?");
@@ -67,7 +105,6 @@ void welcome_screen() {
 }
 
 void insert_workout(sqlite3 *db, Workout *workout) {
-
 
     char insert_query[300];
     snprintf(insert_query, sizeof(insert_query), "INSERT INTO workouts (date, time, duration, training) VALUES ('%s', '%s', %d, '%s');",
@@ -380,17 +417,19 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     const char* text1 = "1. Add Workout";
     const char* text2 = "2. Remove Workout";
     const char* text3 = "3. Display Workouts";
-    const char* text4 = "4. Exit";
-    const char* text5 = "5. help";
-    const char* text6 = "Enter your choice: ";
+    const char* text4 = "4. Add PR";
+    const char* text5 = "5. Exit";
+    const char* text6 = "6. help";
+    const char* text7 = "Enter your choice: ";
 
-    int numLines = 6; // Total number of lines of text
+    int numLines = 7; // Total number of lines of text
     int text_length_1 = strlen(text1);
     int text_length_2 = strlen(text2);
     int text_length_3 = strlen(text3);
     int text_length_4 = strlen(text4);
     int text_length_5 = strlen(text5);
     int text_length_6 = strlen(text6);
+    int text_length_7 = strlen(text7);
 
     int centerX = (window_width - text_length_1) / 2; // Calculate the center position
     int centerY = (window_height - numLines) / 2; // Calculate the center position
@@ -401,10 +440,11 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     mvwprintw(menu_window, centerY + 3, centerX, "%s", text4);
     mvwprintw(menu_window, centerY + 4, centerX, "%s", text5);
     mvwprintw(menu_window, centerY + 5, centerX, "%s", text6);
+    mvwprintw(menu_window, centerY + 6, centerX, "%s", text7);
     wrefresh(menu_window);
 
     // resetting the cursor to be in the menu window
-    wmove(menu_window, centerY + 5, centerX + text_length_6);
+    wmove(menu_window, centerY + 6, centerX + text_length_7);
     wrefresh(menu_window);
 
     char choice_string[10];
@@ -631,7 +671,7 @@ int main(void) {
         return rc;
     }
 
-    Workout workout1[MAX_WORKOUTS];
+    Workout workout[MAX_WORKOUTS];
     int workout_number = 0;
 
     initscr();
@@ -671,8 +711,8 @@ int main(void) {
 
         switch (choice) {
             case 1:
-                add_workout(db, workout1, &workout_number, menu_window);
-                save_workouts_to_file(workout1, workout_number, directory);
+                add_workout(db, workout, &workout_number, menu_window);
+                save_workouts_to_file(workout, workout_number, directory);
                 break;
             case 2:
                 remove_workouts(db, menu_window);
@@ -681,9 +721,12 @@ int main(void) {
                 display_workouts(db, menu_window);
                 break;
             case 4:
+                add_pr(workout, db, menu_window);
+                break;
+            case 5:
                 endwin();
                 return 0;
-            case 5:
+            case 6:
                 help_menu(menu_window);
                 break;
             default:
