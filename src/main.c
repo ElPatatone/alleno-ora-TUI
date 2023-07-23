@@ -16,6 +16,7 @@ typedef struct Lift {
     char name[100];
     int reps;
     int sets;
+    int weight;
 
 } Lift;
 
@@ -49,7 +50,7 @@ void invalid_input(const char *error_message, WINDOW *menu_window) {
     wclear(menu_window);
 }
 
-void add_pr(Workout *workout, sqlite3 *db, WINDOW *menu_window) {
+void add_pr(sqlite3 *db, WINDOW *menu_window) {
 
     wclear(menu_window);
 
@@ -649,6 +650,7 @@ int initialize_database(sqlite3 **db) {
                                          "weight INTEGER,"
                                          "sets INTEGER,"
                                          "reps INTEGER,"
+                                         "is_pr INTEGER,"
                                          "FOREIGN KEY(workout_id) REFERENCES workouts(id)"
                                          ");";
         rc = sqlite3_exec(*db, create_lifts_table_query, NULL, 0, NULL);
@@ -721,7 +723,7 @@ int main(void) {
                 display_workouts(db, menu_window);
                 break;
             case 4:
-                add_pr(workout, db, menu_window);
+                add_pr(db, menu_window);
                 break;
             case 5:
                 endwin();
