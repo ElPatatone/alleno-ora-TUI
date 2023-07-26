@@ -91,7 +91,8 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
         printf("Failed to execute select query: %s\n", sqlite3_errmsg(db));
         return;
     }
-    if(sqlite3_step(stmt) == SQLITE_ROW){
+    int workout_exists = (sqlite3_step(stmt) == SQLITE_ROW);
+    if(workout_exists){
         sqlite3_finalize(stmt);
         char pr_name[100];
         char pr_weight_str[100];
@@ -141,7 +142,52 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
     else {
         sqlite3_finalize(stmt);
         wattron(menu_window, A_BOLD);
-        mvwprintw(menu_window, 8,2, "No Workout found for the entered date. Press any key continue...");
+        mvwprintw(menu_window, 3,2, "No Workout found for the entered date. You can still add a PR.");
+        mvwprintw(menu_window, 4,2, "Press any key to continue...");
+        wattroff(menu_window, A_BOLD);
+        wrefresh(menu_window);
+        getch();
+
+        char pr_name[100];
+        char pr_weight_str[100];
+
+        wclear(menu_window);
+        box(menu_window, 0, 0);
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Add PR for %s", date);
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+        mvwprintw(menu_window, 3, 2, "Enter the name of the PR: ");
+        wmove(menu_window, 3, 28);
+        wrefresh(menu_window);
+        wgetstr(menu_window, pr_name);
+        if (strlen(pr_name) == 0) {
+            return;
+        }
+
+        mvwprintw(menu_window, 4, 2, "Enter the weight of the PR (kg): ");
+        wmove(menu_window, 4, 35);
+        wrefresh(menu_window);
+        wgetstr(menu_window, pr_weight_str);
+
+        if (strlen(pr_weight_str) == 0) {
+            return;
+        }
+
+        int pr_weight = atoi(pr_weight_str);
+        wrefresh(menu_window);
+
+        char insert_pr_query[200];
+        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, is_pr) VALUES ('%s', '%s', %d, 1);", date, pr_name, pr_weight);
+        rc = sqlite3_exec(db, insert_pr_query, NULL, 0, NULL);
+        if (rc != SQLITE_OK) {
+            printf("Failed to execute insert query: %s\n", sqlite3_errmsg(db));
+            return;
+        }
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 8, 2, "PR added successfully. Press any key to conitue...");
         wattroff(menu_window, A_BOLD);
         wrefresh(menu_window);
         getch();
