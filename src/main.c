@@ -65,10 +65,14 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
         wattroff(menu_window, A_BOLD);
         mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-        mvwprintw(menu_window, 3, 2, "Enter the date of the PR: ");
-        wmove(menu_window, 3, 28); // Set the cursor position
+        mvwprintw(menu_window, 3, 2, "Enter the date of the PR (YYYY/MM/DD): ");
+        wmove(menu_window, 3, 41); // Set the cursor position
         wrefresh(menu_window);
-        mvwgetnstr(menu_window, 3, 28, date, sizeof(date));
+        mvwgetnstr(menu_window, 3, 41, date, sizeof(date));
+
+        if (strlen(date) == 0) {
+            return;
+        }
 
         int year, month, day;
         if (sscanf(date, "%d/%d/%d", &year, &month, &day) != 3 ||
@@ -104,11 +108,19 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
         wmove(menu_window, 3, 28);
         wrefresh(menu_window);
         wgetstr(menu_window, pr_name);
+        if (strlen(pr_name) == 0) {
+            return;
+        }
 
         mvwprintw(menu_window, 4, 2, "Enter the weight of the PR (kg): ");
         wmove(menu_window, 4, 35);
         wrefresh(menu_window);
         wgetstr(menu_window, pr_weight_str);
+
+        if (strlen(pr_weight_str) == 0) {
+            return;
+        }
+
         int pr_weight = atoi(pr_weight_str);
         wrefresh(menu_window);
 
@@ -119,14 +131,18 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
             printf("Failed to execute insert query: %s\n", sqlite3_errmsg(db));
             return;
         }
-        mvwprintw(menu_window, 5, 2, "PR added successfully. Press any key to conitue...");
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 8, 2, "PR added successfully. Press any key to conitue...");
+        wattroff(menu_window, A_BOLD);
         wrefresh(menu_window);
         getch();
         return;
     }
     else {
         sqlite3_finalize(stmt);
-        mvwprintw(menu_window, 5,2, "No Workout found for the entered date. Press any key continue...");
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 8,2, "No Workout found for the entered date. Press any key continue...");
+        wattroff(menu_window, A_BOLD);
         wrefresh(menu_window);
         getch();
         return;
@@ -198,6 +214,10 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
         wrefresh(menu_window);
         wgetnstr(menu_window, workout[*workout_number].date, sizeof(workout[*workout_number].date));
 
+        if (strlen(workout[*workout_number].date) == 0) {
+            return;
+        }
+
         int year, month, day;
         if (sscanf(workout[*workout_number].date, "%d/%d/%d", &year, &month, &day) != 3) {
             invalid_input("Invalid date format. Please use the format YYYY/MM/DD.", menu_window);
@@ -229,6 +249,10 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
 
         wrefresh(menu_window);
         wgetnstr(menu_window, workout[*workout_number].time, sizeof(workout[*workout_number].time));
+
+        if (strlen(workout[*workout_number].time) == 0) {
+            return;
+        }
 
         // Check if time is in the format "HH:MM"
         int hour, minute;
@@ -419,11 +443,14 @@ void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
         wrefresh(menu_window);
         mvwgetnstr(menu_window, 3, 43, date, sizeof(date));
 
+        if (strlen(date) == 0) {
+            return;
+        }
+
         int year, month, day;
         if (sscanf(date, "%d/%d/%d", &year, &month, &day) != 3 ||
             day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
             invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
-            break;
         }else {
             break;
         }
