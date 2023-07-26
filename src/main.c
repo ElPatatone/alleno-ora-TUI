@@ -198,6 +198,86 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
 
 }
 
+void display_pr(sqlite3 *db, WINDOW *menu_window) {
+    wclear(menu_window);
+    box(menu_window, 0, 0);
+
+    char *select_query = "SELECT * FROM lifts ORDER BY date DESC;";
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, select_query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to execute select query: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    int max_rows, max_columns;
+    getmaxyx(menu_window, max_rows, max_columns);
+
+    int top_index = 0;  // Index of the topmost visible workout
+    int visible_rows = max_rows - 5;  // Adjust the number of visible rows as needed
+
+    char line[256];
+    int workout_number = 0;
+
+    wattron(menu_window, A_BOLD);
+    mvwprintw(menu_window, 1, 2, "Display PRs");
+    wattroff(menu_window, A_BOLD);
+    mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
+
+    int ch;
+    do {
+        wclear(menu_window);
+        box(menu_window, 0, 0);
+
+        switch (ch) {
+            case KEY_UP:
+                top_index = (top_index > 0) ? top_index - 1 : 0;
+                break;
+            case KEY_DOWN:
+                if (workout_number >= visible_rows)
+                    top_index++;
+                break;
+            default:
+                break;
+        }
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Displaying all PRs");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
+
+        workout_number = 0;
+        sqlite3_reset(stmt);  // Reset statement to re-execute the query
+
+        while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < top_index + visible_rows) {
+            workout_number++;
+            if (workout_number <= top_index)
+                continue;
+
+            int id = sqlite3_column_int(stmt, 0);
+            const unsigned char *date = sqlite3_column_text(stmt, 1);
+            const unsigned char *name = sqlite3_column_text(stmt, 2);
+            int weight = sqlite3_column_int(stmt, 3);
+
+            mvwprintw(menu_window, workout_number - top_index + 2, 2, "- Date: %s", date);
+            mvwprintw(menu_window, workout_number - top_index + 2, 25, "Name: %s", name);
+            mvwprintw(menu_window, workout_number - top_index + 2, 50, "Weight: %d kg", weight);
+            if (workout_number >= top_index + visible_rows)
+                break;
+        }
+
+        if (workout_number > visible_rows) {
+            mvwprintw(menu_window, visible_rows + 3, 2, "Use UP/DOWN arrow keys to scroll");
+        } else {
+            mvwprintw(menu_window, visible_rows + 3, 2, "Press Escape key to continue...");
+        }
+
+        wrefresh(menu_window);
+    } while ((ch = getch()) != 27);  // Exit on Escape key press (27 is the Escape key code)
+
+    sqlite3_finalize(stmt);
+}
+
 void center(char *title) {
     int len, indent, rows, cols;
 
@@ -545,11 +625,12 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     const char* text2 = "2. Remove Workout";
     const char* text3 = "3. Display Workouts";
     const char* text4 = "4. Add PR";
-    const char* text5 = "5. Exit";
-    const char* text6 = "6. help";
-    const char* text7 = "Enter your choice: ";
+    const char* text5 = "5. Display PR";
+    const char* text6 = "6. Exit";
+    const char* text7 = "7. help";
+    const char* text8 = "Enter your choice: ";
 
-    int numLines = 7; // Total number of lines of text
+    int numLines = 8; // Total number of lines of text
     int text_length_1 = strlen(text1);
     int text_length_2 = strlen(text2);
     int text_length_3 = strlen(text3);
@@ -557,6 +638,7 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     int text_length_5 = strlen(text5);
     int text_length_6 = strlen(text6);
     int text_length_7 = strlen(text7);
+    int text_length_8 = strlen(text8);
 
     int centerX = (window_width - text_length_1) / 2; // Calculate the center position
     int centerY = (window_height - numLines) / 2; // Calculate the center position
@@ -568,10 +650,11 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     mvwprintw(menu_window, centerY + 4, centerX, "%s", text5);
     mvwprintw(menu_window, centerY + 5, centerX, "%s", text6);
     mvwprintw(menu_window, centerY + 6, centerX, "%s", text7);
+    mvwprintw(menu_window, centerY + 7, centerX, "%s", text8);
     wrefresh(menu_window);
 
     // resetting the cursor to be in the menu window
-    wmove(menu_window, centerY + 6, centerX + text_length_7);
+    wmove(menu_window, centerY + 7, centerX + text_length_8);
     wrefresh(menu_window);
 
     char choice_string[10];
@@ -852,9 +935,12 @@ int main(void) {
                 add_pr(db, menu_window);
                 break;
             case 5:
+                display_pr(db, menu_window);
+                break;
+            case 6:
                 endwin();
                 return 0;
-            case 6:
+            case 7:
                 help_menu(menu_window);
                 break;
             default:
