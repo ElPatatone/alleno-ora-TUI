@@ -755,7 +755,7 @@ void help_menu(WINDOW *menu_window) {
         "Add Workout",
         "This option allows you to insert a new workout entry. Currently it requires you to input", "the day, time, duration, and the training done for each workout entered.",
         "Please input the fields in the following formats:",
-        "Date - YYYY/MM/DD - e.g. 25/07/2023",
+        "Date - YYYY/MM/DD - e.g. 2023/07/25",
         "Time - HH:MM - e.g. 13:15",
         "Duration - integer for minutes - e.g. 120",
         "Training - string for training - e.g. pull",
@@ -764,11 +764,23 @@ void help_menu(WINDOW *menu_window) {
         "Remove Workout",
         "This option allows you to remove a workout by entering the date it was done.",
         "Please enter the date in the following format:",
-        "Date - YYYY/MM/DD - e.g. 25/07/2023",
+        "Date - YYYY/MM/DD - e.g. 2023/07/25",
         "Disclaimer - Currently there is no exit functionality. You can just enter a wrong", "input, and the program will return to the option menu.",
         " ",
         "Display Workouts",
-        "This option allows you to see all the workouts you have registered in the program by", "reading the data from the workouts.db saved in the database folder."
+        "This option allows you to see all the workouts you have registered in the program by", "reading the data from the workouts.db saved in the database folder.",
+        " ",
+        "Add PR",
+        "This option allows the user to enter details for a PR.",
+        "If there is no workout already saved for the date it will still allow you to just enter", "the PR.",
+        "Please enter the date in the following format:",
+        "Date - YYYY/MM/DD - e.g. 25/07/2023",
+        "Name - string for the name of the lift - e.g. deadlift",
+        "Weight - integer for the weight of the lift (kg) - e.g. 140",
+        " ",
+        "Disaply PR",
+        "This option will allow the user to see all the PRs entries made ordered by date in a", "descending order.",
+
     };
 
     int num_lines = sizeof(help_text) / sizeof(help_text[0]);
