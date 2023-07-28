@@ -300,7 +300,7 @@ void welcome_screen() {
     return;
 }
 
-void insert_workout(sqlite3 *db, Workout *workout) {
+void add_workout_to_db(sqlite3 *db, Workout *workout) {
 
     char insert_query[300];
     snprintf(insert_query, sizeof(insert_query), "INSERT INTO workouts (date, time, duration, training) VALUES ('%s', '%s', %d, '%s');",
@@ -463,7 +463,7 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
     wrefresh(menu_window);
     (*workout_number)++;
 
-    insert_workout(db, &workout[*workout_number - 1]);
+    add_workout_to_db(db, &workout[*workout_number - 1]);
     return;
 }
 
@@ -665,82 +665,6 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     return choice;
 }
 
-int compare_date(const void *a, const void *b) {
-    const Workout *workoutA = (const Workout *)a;
-    const Workout *workoutB = (const Workout *)b;
-
-    // Parse the date strings
-    int dayA, monthA, yearA;
-    int dayB, monthB, yearB;
-    sscanf(workoutA->date, "%d/%d/%d", &dayA, &monthA, &yearA);
-    sscanf(workoutB->date, "%d/%d/%d", &dayB, &monthB, &yearB);
-
-    // Compare year first
-    if (yearA > yearB) {
-        return -1;
-    } else if (yearA < yearB) {
-        return 1;
-    }
-
-    // Compare month next (reversed)
-    if (monthA > monthB) {
-        return -1;
-    } else if (monthA < monthB) {
-        return 1;
-    }
-
-    // Compare day last (reversed)
-    if (dayA > dayB) {
-        return -1;
-    } else if (dayA < dayB) {
-        return 1;
-    }
-    // Dates are equal
-    return 0;
-}
-
-void save_workouts_to_file(Workout *workouts, int length, const char *directory) {
-    FILE *file;
-    char file_path[100];
-    sprintf(file_path, "%s", directory);
-
-    // Read existing_ workouts from the file
-    file = fopen(file_path, "r");
-    Workout existing_workouts[MAX_WORKOUTS];
-    char line[256];
-    int existing_length = 0;
-    if (file != NULL) {
-        while (fgets(line, sizeof(line), file) != NULL && existing_length < MAX_WORKOUTS) {
-            sscanf(line, "%*d Date: %[^,], Time: %[^,], Duration: %d, Training: %[^\n]",
-                   existing_workouts[existing_length].date, existing_workouts[existing_length].time,
-                   &existing_workouts[existing_length].duration, existing_workouts[existing_length].training);
-            existing_length++;
-        }
-        fclose(file);
-    }
-
-    existing_workouts[existing_length] = workouts[length - 1];
-    existing_length++;
-
-    qsort(existing_workouts, existing_length, sizeof(Workout), compare_date);
-
-    file = fopen(file_path, "w");
-    if (file == NULL) {
-        printf("Failed to open file for writing.\n");
-        return;
-    }
-
-    for (int i = 0; i < existing_length; i++) {
-        int workout_numberber = i + 1;
-        fprintf(file, "%d Date: %s, Time: %s, Duration: %d, Training: %s\n",
-                workout_numberber, existing_workouts[i].date, existing_workouts[i].time,
-                existing_workouts[i].duration, existing_workouts[i].training);
-    }
-
-    fclose(file);
-    printf("Workouts saved to file.\n");
-}
-
 void help_menu(WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
@@ -828,7 +752,7 @@ void help_menu(WINDOW *menu_window) {
     } while (ch != 27); // Exit loop on pressing the escape key
 }
 
-bool database_exists(const char *path) {
+bool check_for_database(const char *path) {
     FILE *file = fopen(path, "r");
     if (file) {
         fclose(file);
@@ -839,7 +763,7 @@ bool database_exists(const char *path) {
 
 int initialize_database(sqlite3 **db) {
     const char *database_path = "/home/elpatatone/Documents/alleno-ora/database/workouts.db";
-    bool db_exists = database_exists(database_path);
+    bool db_exists = check_for_database(database_path);
     int rc = sqlite3_open(database_path, db);
 
     if (rc != SQLITE_OK) {
@@ -902,18 +826,6 @@ int main(void) {
 
     welcome_screen();
 
-    FILE *config_file;
-    char directory[100] = "";
-    config_file = fopen("config.txt", "r");
-    if (config_file != NULL) {
-        fgets(directory, sizeof(directory), config_file);
-        // Remove newline character if present
-        if (directory[strlen(directory) - 1] == '\n') {
-            directory[strlen(directory) - 1] = '\0';
-        }
-        fclose(config_file);
-    }
-
     int choice;
     while (1) {
         clear();
@@ -935,7 +847,6 @@ int main(void) {
         switch (choice) {
             case 1:
                 add_workout(db, workout, &workout_number, menu_window);
-                save_workouts_to_file(workout, workout_number, directory);
                 break;
             case 2:
                 remove_workouts(db, menu_window);
