@@ -490,9 +490,9 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
     int workout_number = 0;
 
     wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "Display Workouts");
+    mvwprintw(menu_window, 3, 2, "%-20s %-15s %-10s %-30s", "Date", "Time", "Duration", "Training");
     wattroff(menu_window, A_BOLD);
-    mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
+    mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);  // Header bottom borders
 
     int ch;
     do {
@@ -519,21 +519,28 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
         workout_number = 0;
         sqlite3_reset(stmt);  // Reset statement to re-execute the query
 
+        int bottom_border = 1;
+        int row = 2;
+
         while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < top_index + visible_rows) {
             workout_number++;
             if (workout_number <= top_index)
                 continue;
 
-            int id = sqlite3_column_int(stmt, 0);
             const unsigned char *date = sqlite3_column_text(stmt, 1);
             const unsigned char *time = sqlite3_column_text(stmt, 2);
             int duration = sqlite3_column_int(stmt, 3);
             const unsigned char *training = sqlite3_column_text(stmt, 4);
 
-            mvwprintw(menu_window, workout_number - top_index + 2, 2, "- Date: %s", date);
-            mvwprintw(menu_window, workout_number - top_index + 2, 25, "Time: %s", time);
-            mvwprintw(menu_window, workout_number - top_index + 2, 40, "Duration: %d", duration);
-            mvwprintw(menu_window, workout_number - top_index + 2, 55, "Training: %s", training);
+            mvwprintw(menu_window, workout_number - top_index + row, 2, "- Date: %s", date);
+            mvwprintw(menu_window, workout_number - top_index + row, 25, "Time: %s", time);
+            mvwprintw(menu_window, workout_number - top_index + row, 40, "Duration: %d", duration);
+            mvwprintw(menu_window, workout_number - top_index + row, 55, "Training: %s", training);
+            // mvwhline(menu_window, bottom_border + 1, 1, ACS_HLINE, max_columns - 2);  // Bottom border
+            //
+            // bottom_border += 2;
+            // row += 1;
+
             if (workout_number >= top_index + visible_rows)
                 break;
         }
