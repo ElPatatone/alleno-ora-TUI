@@ -48,11 +48,10 @@ Right now the program has this options:
 
 ## TODO
 
-- [ ] add ablity to remove workouts directly from the file.
-- [ ] Improve the UI as a lot of space is wasted.
 - [ ] Be able to store information on lifts done for a given workout.
-- [ ] Be able to see the stats, PRs for specific lifts.
 - [ ] calculate the improvement for a specific lifts PR.
 - [ ] calculate average/total amount time spent in the gym for any given time frame.
 - [ ] check for any lifts that have been stagnant.
 - [ ] Sort the list by most or least time spent, and by the earliest or latest workout done time wise.
+
+Plans to add a CLI version to give the option to quickly add, check, remove workouts.
