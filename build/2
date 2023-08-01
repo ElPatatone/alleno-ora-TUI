@@ -220,21 +220,9 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
     int workout_number = 0;
 
     wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "Displaying all PRs");
+    mvwprintw(menu_window, 1, 2, "Display PRs");
     wattroff(menu_window, A_BOLD);
     mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
-
-    wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 3, 7, "Date");
-    mvwprintw(menu_window, 3, 19, "Name");
-    mvwprintw(menu_window, 3, 30, "Weight");
-    wattroff(menu_window, A_BOLD);
-    wrefresh(menu_window);
-    mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);
-
-    mvwaddch(menu_window, 3, 17, ACS_VLINE);
-    mvwaddch(menu_window, 3, 27, ACS_VLINE);
-    mvwaddch(menu_window, 3, 40, ACS_VLINE);
 
     int ch;
     do {
@@ -525,18 +513,13 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
         mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
         wattron(menu_window, A_BOLD);
-        mvwprintw(menu_window, 3, 7, "Date");
-        mvwprintw(menu_window, 3, 19, "Time");
-        mvwprintw(menu_window, 3, 30, "Duration");
-        mvwprintw(menu_window, 3, 44, "Training");
+        mvwprintw(menu_window, 3, 6, "Date");
+        mvwprintw(menu_window, 3, 22, "Time");
+        mvwprintw(menu_window, 3, 35, "Duration");
+        mvwprintw(menu_window, 3, 48, "Training");
         wattroff(menu_window, A_BOLD);
         wrefresh(menu_window);
         mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);
-
-        mvwaddch(menu_window, 3, 17, ACS_VLINE);
-        mvwaddch(menu_window, 3, 27, ACS_VLINE);
-        mvwaddch(menu_window, 3, 40, ACS_VLINE);
-        mvwaddch(menu_window, 3, 56, ACS_VLINE);
 
         workout_number = 0;
         sqlite3_reset(stmt);  // Reset statement to re-execute the query
@@ -553,10 +536,10 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
             int duration = sqlite3_column_int(stmt, 3);
             const unsigned char *training = sqlite3_column_text(stmt, 4);
 
-            mvwprintw(menu_window, row, 4, "%s", date);
-            mvwprintw(menu_window, row, 20, "%s", time);
+            mvwprintw(menu_window, row, 2, "%s", date);
+            mvwprintw(menu_window, row, 18, "%s", time);
             mvwprintw(menu_window, row, 32, "%d", duration);
-            mvwprintw(menu_window, row, 44, "%s", training);
+            mvwprintw(menu_window, row, 48, "%s", training);
 
             row++;
 
@@ -572,9 +555,8 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
         // Draw vertical borders
         for (int i = 0; i < visible_rows; i++) {
             mvwaddch(menu_window, 5 + i, 17, ACS_VLINE);
-            mvwaddch(menu_window, 5 + i, 27, ACS_VLINE);
-            mvwaddch(menu_window, 5 + i, 40, ACS_VLINE);
-            mvwaddch(menu_window, 5 + i, 56, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 31, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 47, ACS_VLINE);
         }
 
         wrefresh(menu_window);
