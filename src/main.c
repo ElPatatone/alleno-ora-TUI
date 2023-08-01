@@ -214,27 +214,11 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
     getmaxyx(menu_window, max_rows, max_columns);
 
     int top_index = 0;  // Index of the topmost visible workout
-    int visible_rows = max_rows - 5;  // Adjust the number of visible rows as needed
+    int visible_rows = max_rows - 7;  // Adjust the number of visible rows as needed
 
     char line[256];
     int workout_number = 0;
 
-    wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 1, 2, "Displaying all PRs");
-    wattroff(menu_window, A_BOLD);
-    mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
-
-    wattron(menu_window, A_BOLD);
-    mvwprintw(menu_window, 3, 7, "Date");
-    mvwprintw(menu_window, 3, 19, "Name");
-    mvwprintw(menu_window, 3, 30, "Weight");
-    wattroff(menu_window, A_BOLD);
-    wrefresh(menu_window);
-    mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);
-
-    mvwaddch(menu_window, 3, 17, ACS_VLINE);
-    mvwaddch(menu_window, 3, 27, ACS_VLINE);
-    mvwaddch(menu_window, 3, 40, ACS_VLINE);
 
     int ch;
     do {
@@ -258,8 +242,23 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
         wattroff(menu_window, A_BOLD);
         mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
 
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 3, 7, "Date");
+        mvwprintw(menu_window, 3, 24, "Name");
+        mvwprintw(menu_window, 3, 37, "Weight");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);
+        wrefresh(menu_window);
+
+        mvwaddch(menu_window, 3, 17, ACS_VLINE);
+        mvwaddch(menu_window, 3, 35, ACS_VLINE);
+        mvwaddch(menu_window, 3, 45, ACS_VLINE);
+        wrefresh(menu_window);
+
         workout_number = 0;
         sqlite3_reset(stmt);  // Reset statement to re-execute the query
+
+        int row = 5;
 
         while (sqlite3_step(stmt) == SQLITE_ROW && workout_number < top_index + visible_rows) {
             workout_number++;
@@ -271,17 +270,27 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
             const unsigned char *name = sqlite3_column_text(stmt, 2);
             int weight = sqlite3_column_int(stmt, 3);
 
-            mvwprintw(menu_window, workout_number - top_index + 2, 2, "- Date: %s", date);
-            mvwprintw(menu_window, workout_number - top_index + 2, 25, "Name: %s", name);
-            mvwprintw(menu_window, workout_number - top_index + 2, 50, "Weight: %d kg", weight);
+            mvwprintw(menu_window, row, 4, "%s", date);
+            mvwprintw(menu_window, row, 20, "%s", name);
+            mvwprintw(menu_window, row, 39, "%d", weight);
+
+            row++;
+
             if (workout_number >= top_index + visible_rows)
                 break;
         }
 
         if (workout_number > visible_rows) {
-            mvwprintw(menu_window, visible_rows + 3, 2, "Use UP/DOWN arrow keys to scroll");
+            mvwprintw(menu_window, visible_rows + 5, 2, "Use UP/DOWN arrow keys to scroll");
         } else {
-            mvwprintw(menu_window, visible_rows + 3, 2, "Press Escape key to continue...");
+            mvwprintw(menu_window, visible_rows + 5, 2, "Press Escape key to continue...");
+        }
+
+        // // Draw vertical borders
+        for (int i = 0; i < visible_rows; i++) {
+            mvwaddch(menu_window, 5 + i, 17, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 35, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 45, ACS_VLINE);
         }
 
         wrefresh(menu_window);
