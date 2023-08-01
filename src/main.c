@@ -29,6 +29,8 @@ typedef struct Workout {
     int number_of_lifts;
     Lift lift[MAX_LIFTS];
     Lift pr;
+    int rating;
+    char location[10];
 
 } Workout;
 
@@ -538,6 +540,8 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
         mvwprintw(menu_window, 3, 19, "Time");
         mvwprintw(menu_window, 3, 30, "Duration");
         mvwprintw(menu_window, 3, 44, "Training");
+        mvwprintw(menu_window, 3, 60, "Location");
+        mvwprintw(menu_window, 3, 74, "Rating");
         wattroff(menu_window, A_BOLD);
         wrefresh(menu_window);
         mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);
@@ -546,6 +550,8 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
         mvwaddch(menu_window, 3, 27, ACS_VLINE);
         mvwaddch(menu_window, 3, 40, ACS_VLINE);
         mvwaddch(menu_window, 3, 56, ACS_VLINE);
+        mvwaddch(menu_window, 3, 71, ACS_VLINE);
+        mvwaddch(menu_window, 3, 83, ACS_VLINE);
 
         workout_number = 0;
         sqlite3_reset(stmt);  // Reset statement to re-execute the query
@@ -584,6 +590,8 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
             mvwaddch(menu_window, 5 + i, 27, ACS_VLINE);
             mvwaddch(menu_window, 5 + i, 40, ACS_VLINE);
             mvwaddch(menu_window, 5 + i, 56, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 71, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 83, ACS_VLINE);
         }
 
         wrefresh(menu_window);
