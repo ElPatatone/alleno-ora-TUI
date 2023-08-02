@@ -815,6 +815,73 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
     sqlite3_finalize(stmt);
 }
 
+void remove_lift(sqlite3 *db, WINDOW *menu_window) {
+    wclear(menu_window);
+
+    char date[11];  // Buffer to store the date
+    int ch;
+
+    while(1){
+        box(menu_window, 0, 0);
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Remove a lift");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+        mvwprintw(menu_window, 3, 2, "Enter the date of the lift to remove: ");
+        wmove(menu_window, 3, 40); // Set the cursor position
+        wrefresh(menu_window);
+        mvwgetnstr(menu_window, 3, 40, date, sizeof(date));
+
+        if (strlen(date) == 0) {
+            return;
+        }
+
+        int year, month, day;
+        if (sscanf(date, "%d/%d/%d", &year, &month, &day) != 3 ||
+            day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
+            invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
+        }else {
+            break;
+        }
+    }
+
+    // Prepare the DELETE statement
+    sqlite3_stmt *stmt;
+    char *delete_query = "DELETE FROM lifts WHERE date = ?";
+    int rc = sqlite3_prepare_v2(db, delete_query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to prepare DELETE statement: %s\n", sqlite3_errmsg(db));
+        curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
+        return;
+    }
+
+    // Bind the date parameter
+    rc = sqlite3_bind_text(stmt, 1, date, -1, SQLITE_STATIC);
+    if (rc != SQLITE_OK) {
+        printf("Failed to bind date parameter: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
+        return;
+    }
+
+    // Execute the DELETE statement
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        printf("Failed to execute DELETE statement: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        curs_set(0);  // Hide the cursor
+        noecho();  // Disable input echoing
+        return;
+    }
+
+    // Finalize the statement
+    sqlite3_finalize(stmt);
+    wrefresh(menu_window);
+}
 
 void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
@@ -888,15 +955,16 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
 
     // Text to be centered
     const char* text1 = "1. Add Workout";
-    const char* text2 = "2. Remove Workout";
-    const char* text3 = "3. Display Workouts";
-    const char* text4 = "4. Add PR";
-    const char* text5 = "5. Display PR";
-    const char* text6 = "6. Exit";
-    const char* text7 = "7. help";
-    const char* text8 = "Enter your choice: ";
+    const char* text2 = "2. Add PR";
+    const char* text3 = "3. Remove Workout";
+    const char* text4 = "4. Remove Lift";
+    const char* text5 = "5. Display Workouts";
+    const char* text6 = "6. Display PR";
+    const char* text7 = "7. Exit";
+    const char* text8 = "8. help";
+    const char* text9 = "Enter your choice: ";
 
-    int numLines = 8; // Total number of lines of text
+    int numLines = 9; // Total number of lines of text
     int text_length_1 = strlen(text1);
     int text_length_2 = strlen(text2);
     int text_length_3 = strlen(text3);
@@ -905,6 +973,7 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     int text_length_6 = strlen(text6);
     int text_length_7 = strlen(text7);
     int text_length_8 = strlen(text8);
+    int text_length_9 = strlen(text9);
 
     int centerX = (window_width - text_length_1) / 2; // Calculate the center position
     int centerY = (window_height - numLines) / 2; // Calculate the center position
@@ -917,10 +986,11 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     mvwprintw(menu_window, centerY + 5, centerX, "%s", text6);
     mvwprintw(menu_window, centerY + 6, centerX, "%s", text7);
     mvwprintw(menu_window, centerY + 7, centerX, "%s", text8);
+    mvwprintw(menu_window, centerY + 8, centerX, "%s", text9);
     wrefresh(menu_window);
 
     // resetting the cursor to be in the menu window
-    wmove(menu_window, centerY + 7, centerX + text_length_8);
+    wmove(menu_window, centerY + 8, centerX + text_length_9);
     wrefresh(menu_window);
 
     char choice_string[10];
@@ -951,15 +1021,6 @@ void help_menu(WINDOW *menu_window) {
         "Training - string for training - e.g. pull",
         "Disclaimer - This currently has no exit functionality",
         " ",
-        "Remove Workout",
-        "This option allows you to remove a workout by entering the date it was done.",
-        "Please enter the date in the following format:",
-        "Date - YYYY/MM/DD - e.g. 2023/07/25",
-        "Disclaimer - Currently there is no exit functionality. You can just enter a wrong", "input, and the program will return to the option menu.",
-        " ",
-        "Display Workouts",
-        "This option allows you to see all the workouts you have registered in the program by", "reading the data from the workouts.db saved in the database folder.",
-        " ",
         "Add PR",
         "This option allows the user to enter details for a PR.",
         "If there is no workout already saved for the date it will still allow you to just enter", "the PR.",
@@ -967,6 +1028,21 @@ void help_menu(WINDOW *menu_window) {
         "Date - YYYY/MM/DD - e.g. 25/07/2023",
         "Name - string for the name of the lift - e.g. deadlift",
         "Weight - integer for the weight of the lift (kg) - e.g. 140",
+        " ",
+        "Remove Workout",
+        "This option allows you to remove a workout by entering the date it was done.",
+        "Please enter the date in the following format:",
+        "Date - YYYY/MM/DD - e.g. 2023/07/25",
+        "Disclaimer - Currently there is no exit functionality. You can just enter a wrong", "input, and the program will return to the option menu.",
+        " ",
+        "Remove Lift",
+        "This option allows you to remove a lift by entering the date it was done.",
+        "Please enter the date in the following format:",
+        "Date - YYYY/MM/DD - e.g. 2023/07/25",
+        "Disclaimer - Currently there is no exit functionality. You can just enter a wrong", "input, and the program will return to the option menu.",
+        " ",
+        "Display Workouts",
+        "This option allows you to see all the workouts you have registered in the program by", "reading the data from the workouts.db saved in the database folder.",
         " ",
         "Disaply PR",
         "This option will allow the user to see all the PRs entries made ordered by date in a", "descending order.",
@@ -1114,25 +1190,25 @@ int main(void) {
                 add_workout(db, menu_window);
                 break;
             case 2:
-                remove_workouts(db, menu_window);
-                break;
-            case 3:
-                display_workouts(db, menu_window);
-                break;
-            case 4:
                 add_pr(db, menu_window);
                 break;
+            case 3:
+                remove_workouts(db, menu_window);
+                break;
+            case 4:
+                remove_lift(db, menu_window);
+                break;
             case 5:
-                display_pr(db, menu_window);
+                display_workouts(db, menu_window);
                 break;
             case 6:
+                display_pr(db, menu_window);
+                break;
+            case 7:
                 endwin();
                 return 0;
-            case 7:
-                help_menu(menu_window);
-                break;
             case 8:
-                remove_lift(db, menu_window);
+                help_menu(menu_window);
                 break;
             default:
                 invalid_input("Invalid choice, try again.", menu_window);
