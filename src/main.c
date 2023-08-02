@@ -13,10 +13,12 @@
 
 typedef struct Lift {
 
+    char date[15];
     char name[100];
-    int reps;
-    int sets;
     int weight;
+    int sets;
+    int reps;
+    int is_pr;
 
 } Lift;
 
@@ -56,7 +58,8 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
 
     wclear(menu_window);
 
-    char date[11];  // Buffer to store the date
+    Lift pr_lift;
+
     int ch;
 
     while(1){
@@ -70,14 +73,14 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
         mvwprintw(menu_window, 3, 2, "Enter the date of the PR (YYYY/MM/DD): ");
         wmove(menu_window, 3, 41); // Set the cursor position
         wrefresh(menu_window);
-        mvwgetnstr(menu_window, 3, 41, date, sizeof(date));
+        mvwgetnstr(menu_window, 3, 41, pr_lift.date, sizeof(pr_lift.date));
 
-        if (strlen(date) == 0) {
+        if (strlen(pr_lift.date) == 0) {
             return;
         }
 
         int year, month, day;
-        if (sscanf(date, "%d/%d/%d", &year, &month, &day) != 3 ||
+        if (sscanf(pr_lift.date, "%d/%d/%d", &year, &month, &day) != 3 ||
             day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
             invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
         }else {
@@ -86,32 +89,32 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
     }
 
     char select_workout_query[100];
-    sprintf(select_workout_query, "SELECT date FROM workouts WHERE date = '%s';", date);
+    sprintf(select_workout_query, "SELECT date FROM workouts WHERE date = '%s';", pr_lift.date);
     sqlite3_stmt *stmt;
     int rc = sqlite3_prepare_v2(db, select_workout_query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
         printf("Failed to execute select query: %s\n", sqlite3_errmsg(db));
         return;
     }
+
     int workout_exists = (sqlite3_step(stmt) == SQLITE_ROW);
     if(workout_exists){
         sqlite3_finalize(stmt);
-        char pr_name[100];
         char pr_weight_str[100];
 
         wclear(menu_window);
         box(menu_window, 0, 0);
 
         wattron(menu_window, A_BOLD);
-        mvwprintw(menu_window, 1, 2, "Add PR for %s", date);
+        mvwprintw(menu_window, 1, 2, "Add PR for %s", pr_lift.date);
         wattroff(menu_window, A_BOLD);
         mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
         mvwprintw(menu_window, 3, 2, "Enter the name of the PR: ");
         wmove(menu_window, 3, 28);
         wrefresh(menu_window);
-        wgetstr(menu_window, pr_name);
-        if (strlen(pr_name) == 0) {
+        wgetstr(menu_window, pr_lift.name);
+        if (strlen(pr_lift.name) == 0) {
             return;
         }
 
@@ -124,11 +127,11 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
             return;
         }
 
-        int pr_weight = atoi(pr_weight_str);
+        pr_lift.weight = atoi(pr_weight_str);
         wrefresh(menu_window);
 
         char insert_pr_query[200];
-        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, is_pr) VALUES ('%s', '%s', %d, 1);", date, pr_name, pr_weight);
+        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, is_pr) VALUES ('%s', '%s', %d, 1);", pr_lift.date, pr_lift.name, pr_lift.weight);
         rc = sqlite3_exec(db, insert_pr_query, NULL, 0, NULL);
         if (rc != SQLITE_OK) {
             printf("Failed to execute insert query: %s\n", sqlite3_errmsg(db));
@@ -150,22 +153,21 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
         wrefresh(menu_window);
         getch();
 
-        char pr_name[100];
         char pr_weight_str[100];
 
         wclear(menu_window);
         box(menu_window, 0, 0);
 
         wattron(menu_window, A_BOLD);
-        mvwprintw(menu_window, 1, 2, "Add PR for %s", date);
+        mvwprintw(menu_window, 1, 2, "Add PR for %s", pr_lift.date);
         wattroff(menu_window, A_BOLD);
         mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
         mvwprintw(menu_window, 3, 2, "Enter the name of the PR: ");
         wmove(menu_window, 3, 28);
         wrefresh(menu_window);
-        wgetstr(menu_window, pr_name);
-        if (strlen(pr_name) == 0) {
+        wgetstr(menu_window, pr_lift.name);
+        if (strlen(pr_lift.name) == 0) {
             return;
         }
 
@@ -178,11 +180,11 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
             return;
         }
 
-        int pr_weight = atoi(pr_weight_str);
+        pr_lift.weight = atoi(pr_weight_str);
         wrefresh(menu_window);
 
         char insert_pr_query[200];
-        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, is_pr) VALUES ('%s', '%s', %d, 1);", date, pr_name, pr_weight);
+        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, is_pr) VALUES ('%s', '%s', %d, 1);", pr_lift.date, pr_lift.name, pr_lift.weight);
         rc = sqlite3_exec(db, insert_pr_query, NULL, 0, NULL);
         if (rc != SQLITE_OK) {
             printf("Failed to execute insert query: %s\n", sqlite3_errmsg(db));
@@ -220,7 +222,6 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
 
     char line[256];
     int workout_number = 0;
-
 
     int ch;
     do {
@@ -345,9 +346,11 @@ void add_workout_to_db(sqlite3 *db, Workout *workout) {
     }
 }
 
-void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *menu_window) {
+void add_workout(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
     box(menu_window, 0, 0);
+
+    Workout workout;
 
     while (1) {
         box(menu_window, 0, 0);
@@ -361,14 +364,14 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
 
         wmove(menu_window, 3, 21); // Set the cursor position
         wrefresh(menu_window);
-        wgetnstr(menu_window, workout[*workout_number].date, sizeof(workout[*workout_number].date));
+        wgetnstr(menu_window, workout.date, sizeof(workout.date));
 
-        if (strlen(workout[*workout_number].date) == 0) {
+        if (strlen(workout.date) == 0) {
             return;
         }
 
         int year, month, day;
-        if (sscanf(workout[*workout_number].date, "%d/%d/%d", &year, &month, &day) != 3) {
+        if (sscanf(workout.date, "%d/%d/%d", &year, &month, &day) != 3) {
             invalid_input("Invalid date format. Please use the format YYYY/MM/DD.", menu_window);
         } else {
             if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
@@ -390,22 +393,22 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
             wattroff(menu_window, A_BOLD);
             mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout[*workout_number].date);
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout.date);
             mvwprintw(menu_window, 4, 2, "Time (HH:MM): ");
         } else {
             mvwprintw(menu_window, 4, 2, "Time (HH:MM): ");
         }
 
         wrefresh(menu_window);
-        wgetnstr(menu_window, workout[*workout_number].time, sizeof(workout[*workout_number].time));
+        wgetnstr(menu_window, workout.time, sizeof(workout.time));
 
-        if (strlen(workout[*workout_number].time) == 0) {
+        if (strlen(workout.time) == 0) {
             return;
         }
 
         // Check if time is in the format "HH:MM"
         int hour, minute;
-        if (sscanf(workout[*workout_number].time, "%d:%d", &hour, &minute) != 2) {
+        if (sscanf(workout.time, "%d:%d", &hour, &minute) != 2) {
             invalid_input("Invalid time format. Please use the format HH:MM.", menu_window);
             iteration1++;
         } else {
@@ -429,8 +432,8 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
             wattroff(menu_window, A_BOLD);
             mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout[*workout_number].date);
-            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout[*workout_number].time);
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout.date);
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout.time);
             mvwprintw(menu_window, 5, 2, "Duration (minutes): ");
         } else {
             mvwprintw(menu_window, 5, 2, "Duration (minutes): ");
@@ -441,9 +444,9 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
         wmove(menu_window, 5, 22); // Set the cursor position
         wrefresh(menu_window);
         wgetstr(menu_window, duration_string);
-        sscanf(duration_string, "%d", &workout[*workout_number].duration);
+        sscanf(duration_string, "%d", &workout.duration);
 
-        if (workout[*workout_number].duration <= 0) {
+        if (workout.duration <= 0) {
             invalid_input("Invalid input for duration.", menu_window);
             iteration2++;
         } else {
@@ -462,18 +465,18 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
             wattroff(menu_window, A_BOLD);
             mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout[*workout_number].date);
-            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout[*workout_number].time);
-            mvwprintw(menu_window, 5, 2, "Duration (minutes): %d", workout[*workout_number].duration);
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout.date);
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout.time);
+            mvwprintw(menu_window, 5, 2, "Duration (minutes): %d", workout.duration);
             mvwprintw(menu_window, 6, 2, "Training done: ");
         } else {
             mvwprintw(menu_window, 6, 2, "Training done: ");
         }
 
         wrefresh(menu_window);
-        wgetnstr(menu_window, workout[*workout_number].training, sizeof(workout[*workout_number].training));
+        wgetnstr(menu_window, workout.training, sizeof(workout.training));
 
-        if (strlen(workout[*workout_number].training) == 0) {
+        if (strlen(workout.training) == 0) {
             invalid_input("Training value cannot be empty. Please enter a valid training value.", menu_window);
             iteration3++;
         } else {
@@ -482,11 +485,10 @@ void add_workout(sqlite3 *db, Workout *workout, int *workout_number, WINDOW *men
     }
 
     // Remove the training value appended to the date value (No idea why this happens)
-    strtok(workout[*workout_number].date, " \t\n");
+    strtok(workout.date, " \t\n");
     wrefresh(menu_window);
-    (*workout_number)++;
 
-    add_workout_to_db(db, &workout[*workout_number - 1]);
+    add_workout_to_db(db, &workout);
     return;
 }
 
@@ -825,12 +827,14 @@ int initialize_database(sqlite3 **db) {
     // Create the table for workouts if the database doesn't exist
     if (!db_exists) {
         char *create_table_query = "CREATE TABLE workouts ("
-                                   "id INTEGER PRIMARY KEY,"
-                                   "date TEXT,"
-                                   "time TEXT,"
-                                   "duration INTEGER,"
-                                   "training TEXT"
-                                   ");";
+                                    "id INTEGER PRIMARY KEY,"
+                                    "date TEXT,"
+                                    "time TEXT,"
+                                    "duration INTEGER,"
+                                    "training TEXT,"
+                                    "rating INTEGER,"
+                                    "location TEXT"
+                                    ");";
         rc = sqlite3_exec(*db, create_table_query, NULL, 0, NULL);
         if (rc != SQLITE_OK) {
             printf("Failed to create table: %s\n", sqlite3_errmsg(*db));
@@ -841,13 +845,13 @@ int initialize_database(sqlite3 **db) {
         // Create the table for lifts
         char *create_lifts_table_query = "CREATE TABLE lifts ("
                                          "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                         "workout_id INTEGER,"
+                                         "date TEXT,"
                                          "name TEXT,"
                                          "weight INTEGER,"
                                          "sets INTEGER,"
                                          "reps INTEGER,"
                                          "is_pr INTEGER,"
-                                         "FOREIGN KEY(workout_id) REFERENCES workouts(id)"
+                                         "FOREIGN KEY(date) REFERENCES workouts(date)"
                                          ");";
         rc = sqlite3_exec(*db, create_lifts_table_query, NULL, 0, NULL);
         if (rc != SQLITE_OK) {
@@ -868,9 +872,6 @@ int main(void) {
     if (rc != SQLITE_OK) {
         return rc;
     }
-
-    Workout workout[MAX_WORKOUTS];
-    int workout_number = 0;
 
     initscr();
     keypad(stdscr, TRUE);
@@ -897,7 +898,7 @@ int main(void) {
 
         switch (choice) {
             case 1:
-                add_workout(db, workout, &workout_number, menu_window);
+                add_workout(db, menu_window);
                 break;
             case 2:
                 remove_workouts(db, menu_window);
