@@ -327,8 +327,8 @@ void welcome_screen() {
 void add_workout_to_db(sqlite3 *db, Workout *workout) {
 
     char insert_query[300];
-    snprintf(insert_query, sizeof(insert_query), "INSERT INTO workouts (date, time, duration, training) VALUES ('%s', '%s', %d, '%s');",
-            workout->date, workout->time, workout->duration, workout->training);
+    snprintf(insert_query, sizeof(insert_query), "INSERT INTO workouts (date, time, duration, training, location, rating) VALUES ('%s', '%s', %d, '%s', '%s', '%d');",
+            workout->date, workout->time, workout->duration, workout->training, workout->location, workout->rating);
 
     char *error_message = NULL;
     int rc = sqlite3_exec(db, insert_query, 0, 0, &error_message);
@@ -483,7 +483,75 @@ void add_workout(sqlite3 *db, WINDOW *menu_window) {
             break;
         }
     }
+    wrefresh(menu_window);
 
+    int iteration4 = 1;
+    while (1) {
+        box(menu_window, 0, 0);
+
+        if (iteration4 > 1) {
+            wattron(menu_window, A_BOLD);
+            mvwprintw(menu_window, 1, 2, "Add Workout");
+            wattroff(menu_window, A_BOLD);
+            mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout.date);
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout.time);
+            mvwprintw(menu_window, 5, 2, "Duration (minutes): %d", workout.duration);
+            mvwprintw(menu_window, 6, 2, "Training done: %s", workout.training);
+            mvwprintw(menu_window, 7, 2, "Location: ");
+
+        } else {
+            mvwprintw(menu_window, 7, 2, "Location: ");
+        }
+
+        wrefresh(menu_window);
+        wgetnstr(menu_window, workout.location, sizeof(workout.location));
+
+        if (strlen(workout.training) == 0) {
+            invalid_input("Location value cannot be empty. Please enter a valid training value.", menu_window);
+            iteration4++;
+        } else {
+            break;
+        }
+    }
+    wrefresh(menu_window);
+
+    int iteration5 = 1;
+    while (1) {
+        box(menu_window, 0, 0);
+
+        if (iteration5 > 1) {
+            wattron(menu_window, A_BOLD);
+            mvwprintw(menu_window, 1, 2, "Add Workout");
+            wattroff(menu_window, A_BOLD);
+            mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+            mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", workout.date);
+            mvwprintw(menu_window, 4, 2, "Time (HH:MM): %s", workout.time);
+            mvwprintw(menu_window, 5, 2, "Duration (minutes): %d", workout.duration);
+            mvwprintw(menu_window, 6, 2, "Training done: %s", workout.training);
+            mvwprintw(menu_window, 7, 2, "Location: %s", workout.location);
+            mvwprintw(menu_window, 8, 2, "Rating (1-5): ");
+
+        } else {
+            mvwprintw(menu_window, 8, 2, "Rating (1-5): ");
+        }
+
+        char rating_string[10];
+        wmove(menu_window, 8, 16); // Set the cursor position
+        wrefresh(menu_window);
+        wgetstr(menu_window, rating_string);
+        sscanf(rating_string, "%d", &workout.rating);
+
+        if (workout.rating <= 0) {
+            invalid_input("Invalid input for rating.", menu_window);
+            iteration5++;
+        } else {
+            break;
+        }
+    }
+    wrefresh(menu_window);
     // Remove the training value appended to the date value (No idea why this happens)
     strtok(workout.date, " \t\n");
     wrefresh(menu_window);
