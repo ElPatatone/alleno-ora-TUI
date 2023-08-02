@@ -392,14 +392,16 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
         wattron(menu_window, A_BOLD);
         mvwprintw(menu_window, 3, 7, "Date");
         mvwprintw(menu_window, 3, 24, "Name");
-        mvwprintw(menu_window, 3, 37, "Weight");
+        mvwprintw(menu_window, 3, 38, "Weight");
+        mvwprintw(menu_window, 3, 48, "Reps");
         wattroff(menu_window, A_BOLD);
         mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);
         wrefresh(menu_window);
 
         mvwaddch(menu_window, 3, 17, ACS_VLINE);
         mvwaddch(menu_window, 3, 35, ACS_VLINE);
-        mvwaddch(menu_window, 3, 45, ACS_VLINE);
+        mvwaddch(menu_window, 3, 46, ACS_VLINE);
+        mvwaddch(menu_window, 3, 54, ACS_VLINE);
         wrefresh(menu_window);
 
         workout_number = 0;
@@ -416,10 +418,12 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
             const unsigned char *date = sqlite3_column_text(stmt, 1);
             const unsigned char *name = sqlite3_column_text(stmt, 2);
             int weight = sqlite3_column_int(stmt, 3);
+            int reps = sqlite3_column_int(stmt, 5);
 
             mvwprintw(menu_window, row, 4, "%s", date);
             mvwprintw(menu_window, row, 20, "%s", name);
             mvwprintw(menu_window, row, 39, "%d", weight);
+            mvwprintw(menu_window, row, 49, "%d", reps);
 
             row++;
 
@@ -437,7 +441,8 @@ void display_pr(sqlite3 *db, WINDOW *menu_window) {
         for (int i = 0; i < visible_rows; i++) {
             mvwaddch(menu_window, 5 + i, 17, ACS_VLINE);
             mvwaddch(menu_window, 5 + i, 35, ACS_VLINE);
-            mvwaddch(menu_window, 5 + i, 45, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 46, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 54, ACS_VLINE);
         }
 
         wrefresh(menu_window);
@@ -781,11 +786,15 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
             const unsigned char *time = sqlite3_column_text(stmt, 2);
             int duration = sqlite3_column_int(stmt, 3);
             const unsigned char *training = sqlite3_column_text(stmt, 4);
+            int rating = sqlite3_column_int(stmt, 5);
+            const unsigned char *location = sqlite3_column_text(stmt, 6);
 
             mvwprintw(menu_window, row, 4, "%s", date);
             mvwprintw(menu_window, row, 20, "%s", time);
             mvwprintw(menu_window, row, 32, "%d", duration);
             mvwprintw(menu_window, row, 44, "%s", training);
+            mvwprintw(menu_window, row, 61, "%s", location);
+            mvwprintw(menu_window, row, 77, "%d", rating);
 
             row++;
 
