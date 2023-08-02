@@ -55,38 +55,41 @@ void invalid_input(const char *error_message, WINDOW *menu_window) {
 }
 
 void add_pr(sqlite3 *db, WINDOW *menu_window) {
-
     wclear(menu_window);
+    box(menu_window, 0, 0);
 
     Lift pr_lift;
 
-    int ch;
-
-    while(1){
+    while (1) {
         box(menu_window, 0, 0);
-
         wattron(menu_window, A_BOLD);
         mvwprintw(menu_window, 1, 2, "Add PR");
         wattroff(menu_window, A_BOLD);
         mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-        mvwprintw(menu_window, 3, 2, "Enter the date of the PR (YYYY/MM/DD): ");
-        wmove(menu_window, 3, 41); // Set the cursor position
+        mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): ");
         wrefresh(menu_window);
-        mvwgetnstr(menu_window, 3, 41, pr_lift.date, sizeof(pr_lift.date));
+
+        wmove(menu_window, 3, 21); // Set the cursor position
+        wrefresh(menu_window);
+        wgetnstr(menu_window, pr_lift.date, sizeof(pr_lift.date));
 
         if (strlen(pr_lift.date) == 0) {
             return;
         }
 
         int year, month, day;
-        if (sscanf(pr_lift.date, "%d/%d/%d", &year, &month, &day) != 3 ||
-            day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
-            invalid_input("Invalid date format or invalid date. Please enter a valid date.", menu_window);
-        }else {
-            break;
+        if (sscanf(pr_lift.date, "%d/%d/%d", &year, &month, &day) != 3) {
+            invalid_input("Invalid date format. Please use the format YYYY/MM/DD.", menu_window);
+        } else {
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
+                invalid_input("Invalid date. Please enter a valid date.", menu_window);
+            } else {
+                break;
+            }
         }
     }
+    wrefresh(menu_window);
 
     char select_workout_query[100];
     sprintf(select_workout_query, "SELECT date FROM workouts WHERE date = '%s';", pr_lift.date);
@@ -100,43 +103,111 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
     int workout_exists = (sqlite3_step(stmt) == SQLITE_ROW);
     if(workout_exists){
         sqlite3_finalize(stmt);
-        char pr_weight_str[100];
 
-        wclear(menu_window);
-        box(menu_window, 0, 0);
+        int iteration1 = 1;
+        while (1) {
+            box(menu_window, 0, 0);
 
-        wattron(menu_window, A_BOLD);
-        mvwprintw(menu_window, 1, 2, "Add PR for %s", pr_lift.date);
-        wattroff(menu_window, A_BOLD);
-        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+            if (iteration1 > 1) {
+                wattron(menu_window, A_BOLD);
+                mvwprintw(menu_window, 1, 2, "Add PR");
+                wattroff(menu_window, A_BOLD);
+                mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-        mvwprintw(menu_window, 3, 2, "Enter the name of the PR: ");
-        wmove(menu_window, 3, 28);
-        wrefresh(menu_window);
-        wgetstr(menu_window, pr_lift.name);
-        if (strlen(pr_lift.name) == 0) {
-            return;
+                mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", pr_lift.date);
+                mvwprintw(menu_window, 4, 2, "Name of the lift: ");
+            } else {
+                mvwprintw(menu_window, 4, 2, "Name of the lift: ");
+            }
+
+            wrefresh(menu_window);
+            wgetnstr(menu_window, pr_lift.name, sizeof(pr_lift.name));
+
+            if (strlen(pr_lift.name) == 0) {
+                invalid_input("Name of the PR cannot be empty", menu_window);
+                iteration1++;
+            }else{
+                break;
+            }
         }
-
-        mvwprintw(menu_window, 4, 2, "Enter the weight of the PR (kg): ");
-        wmove(menu_window, 4, 35);
         wrefresh(menu_window);
-        wgetstr(menu_window, pr_weight_str);
 
-        if (strlen(pr_weight_str) == 0) {
-            return;
+        int iteration2 = 1;
+        while (1) {
+            box(menu_window, 0, 0);
+
+            if (iteration2 > 1) {
+                wattron(menu_window, A_BOLD);
+                mvwprintw(menu_window, 1, 2, "Add PR");
+                wattroff(menu_window, A_BOLD);
+                mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+                mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", pr_lift.date);
+                mvwprintw(menu_window, 4, 2, "Name of the lift: %s", pr_lift.name);
+                mvwprintw(menu_window, 5, 2, "Weight (kg): ");
+            } else {
+                mvwprintw(menu_window, 5, 2, "Weight (kg): ");
+            }
+
+            wrefresh(menu_window);
+            char weight_string[10];
+            wmove(menu_window, 5, 15); // Set the cursor position
+            wrefresh(menu_window);
+            wgetstr(menu_window, weight_string);
+            sscanf(weight_string, "%d", &pr_lift.weight);
+
+            if (pr_lift.weight <= 0) {
+                invalid_input("Weight must be more than 0.", menu_window);
+                iteration2++;
+            } else {
+                break;
+            }
         }
-
-        pr_lift.weight = atoi(pr_weight_str);
         wrefresh(menu_window);
+
+        int iteration3 = 1;
+        while (1) {
+            box(menu_window, 0, 0);
+
+            if (iteration3 > 1) {
+                wattron(menu_window, A_BOLD);
+                mvwprintw(menu_window, 1, 2, "Add PR");
+                wattroff(menu_window, A_BOLD);
+                mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+                mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", pr_lift.date);
+                mvwprintw(menu_window, 4, 2, "Name of the lift: %s", pr_lift.name);
+                mvwprintw(menu_window, 5, 2, "Weight (kg): %d", pr_lift.weight);
+                mvwprintw(menu_window, 6, 2, "Reps: ");
+            } else {
+                mvwprintw(menu_window, 6, 2, "Reps: ");
+            }
+
+            wrefresh(menu_window);
+            char reps_string[10];
+            wmove(menu_window, 6, 8); // Set the cursor position
+            wrefresh(menu_window);
+            wgetstr(menu_window, reps_string);
+            sscanf(reps_string, "%d", &pr_lift.reps);
+
+            if (pr_lift.reps < 1) {
+                invalid_input("There must be at least 1 rep.", menu_window);
+                iteration3++;
+            } else {
+                break;
+            }
+        }
+        wrefresh(menu_window);
+
 
         char insert_pr_query[200];
-        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, is_pr) VALUES ('%s', '%s', %d, 1);", pr_lift.date, pr_lift.name, pr_lift.weight);
-        rc = sqlite3_exec(db, insert_pr_query, NULL, 0, NULL);
+        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, reps, is_pr) VALUES ('%s', '%s', %d, %d, 1);", pr_lift.date, pr_lift.name, pr_lift.weight, pr_lift.reps);
+        int rc = sqlite3_exec(db, insert_pr_query, NULL, 0, NULL);
         if (rc != SQLITE_OK) {
             printf("Failed to execute insert query: %s\n", sqlite3_errmsg(db));
             return;
         }
+
         wattron(menu_window, A_BOLD);
         mvwprintw(menu_window, 8, 2, "PR added successfully. Press any key to conitue...");
         wattroff(menu_window, A_BOLD);
@@ -153,43 +224,116 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
         wrefresh(menu_window);
         getch();
 
-        char pr_weight_str[100];
-
         wclear(menu_window);
-        box(menu_window, 0, 0);
+        int iteration1 = 1;
+        while (1) {
+            box(menu_window, 0, 0);
 
-        wattron(menu_window, A_BOLD);
-        mvwprintw(menu_window, 1, 2, "Add PR for %s", pr_lift.date);
-        wattroff(menu_window, A_BOLD);
-        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+            if (iteration1 > 1) {
+                wattron(menu_window, A_BOLD);
+                mvwprintw(menu_window, 1, 2, "Add PR");
+                wattroff(menu_window, A_BOLD);
+                mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
 
-        mvwprintw(menu_window, 3, 2, "Enter the name of the PR: ");
-        wmove(menu_window, 3, 28);
-        wrefresh(menu_window);
-        wgetstr(menu_window, pr_lift.name);
-        if (strlen(pr_lift.name) == 0) {
-            return;
+                mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", pr_lift.date);
+                mvwprintw(menu_window, 4, 2, "Name of the lift: ");
+            } else {
+                wattron(menu_window, A_BOLD);
+                mvwprintw(menu_window, 1, 2, "Add PR");
+                wattroff(menu_window, A_BOLD);
+                mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+                mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", pr_lift.date);
+                mvwprintw(menu_window, 4, 2, "Name of the lift: ");
+            }
+
+            wrefresh(menu_window);
+            wgetnstr(menu_window, pr_lift.name, sizeof(pr_lift.name));
+
+            if (strlen(pr_lift.name) == 0) {
+                invalid_input("Name of the PR cannot be empty", menu_window);
+                iteration1++;
+            }else{
+                break;
+            }
         }
-
-        mvwprintw(menu_window, 4, 2, "Enter the weight of the PR (kg): ");
-        wmove(menu_window, 4, 35);
         wrefresh(menu_window);
-        wgetstr(menu_window, pr_weight_str);
 
-        if (strlen(pr_weight_str) == 0) {
-            return;
+        int iteration2 = 1;
+        while (1) {
+            box(menu_window, 0, 0);
+
+            if (iteration2 > 1) {
+                wattron(menu_window, A_BOLD);
+                mvwprintw(menu_window, 1, 2, "Add PR");
+                wattroff(menu_window, A_BOLD);
+                mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+                mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", pr_lift.date);
+                mvwprintw(menu_window, 4, 2, "Name of the lift: %s", pr_lift.name);
+                mvwprintw(menu_window, 5, 2, "Weight (kg): ");
+            } else {
+                mvwprintw(menu_window, 5, 2, "Weight (kg): ");
+            }
+
+            wrefresh(menu_window);
+            char weight_string[10];
+            wmove(menu_window, 5, 15); // Set the cursor position
+            wrefresh(menu_window);
+            wgetstr(menu_window, weight_string);
+            sscanf(weight_string, "%d", &pr_lift.weight);
+
+            if (pr_lift.weight <= 0) {
+                invalid_input("Weight must be more than 0.", menu_window);
+                iteration2++;
+            } else {
+                break;
+            }
         }
+        wrefresh(menu_window);
 
-        pr_lift.weight = atoi(pr_weight_str);
+        int iteration3 = 1;
+        while (1) {
+            box(menu_window, 0, 0);
+
+            if (iteration3 > 1) {
+                wattron(menu_window, A_BOLD);
+                mvwprintw(menu_window, 1, 2, "Add PR");
+                wattroff(menu_window, A_BOLD);
+                mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+                mvwprintw(menu_window, 3, 2, "Date (YYYY/MM/DD): %s", pr_lift.date);
+                mvwprintw(menu_window, 4, 2, "Name of the lift: %s", pr_lift.name);
+                mvwprintw(menu_window, 5, 2, "Weight (kg): %d", pr_lift.weight);
+                mvwprintw(menu_window, 6, 2, "Reps: ");
+            } else {
+                mvwprintw(menu_window, 6, 2, "Reps: ");
+            }
+
+            wrefresh(menu_window);
+            char reps_string[10];
+            wmove(menu_window, 6, 8); // Set the cursor position
+            wrefresh(menu_window);
+            wgetstr(menu_window, reps_string);
+            sscanf(reps_string, "%d", &pr_lift.reps);
+
+            if (pr_lift.reps < 1) {
+                invalid_input("There must be at least 1 rep.", menu_window);
+                iteration3++;
+            } else {
+                break;
+            }
+        }
         wrefresh(menu_window);
 
         char insert_pr_query[200];
-        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, is_pr) VALUES ('%s', '%s', %d, 1);", pr_lift.date, pr_lift.name, pr_lift.weight);
-        rc = sqlite3_exec(db, insert_pr_query, NULL, 0, NULL);
+        sprintf(insert_pr_query, "INSERT INTO lifts (date, name, weight, reps, is_pr) VALUES ('%s', '%s', %d, %d, 1);", pr_lift.date, pr_lift.name, pr_lift.weight, pr_lift.reps);
+        int rc = sqlite3_exec(db, insert_pr_query, NULL, 0, NULL);
         if (rc != SQLITE_OK) {
             printf("Failed to execute insert query: %s\n", sqlite3_errmsg(db));
             return;
         }
+
         wattron(menu_window, A_BOLD);
         mvwprintw(menu_window, 8, 2, "PR added successfully. Press any key to conitue...");
         wattroff(menu_window, A_BOLD);
@@ -199,8 +343,8 @@ void add_pr(sqlite3 *db, WINDOW *menu_window) {
     }
     sqlite3_finalize(stmt);
     getch();
-
 }
+
 
 void display_pr(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
@@ -671,6 +815,7 @@ void display_workouts(sqlite3 *db, WINDOW *menu_window) {
     sqlite3_finalize(stmt);
 }
 
+
 void remove_workouts(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
 
@@ -985,6 +1130,9 @@ int main(void) {
                 return 0;
             case 7:
                 help_menu(menu_window);
+                break;
+            case 8:
+                remove_lift(db, menu_window);
                 break;
             default:
                 invalid_input("Invalid choice, try again.", menu_window);
