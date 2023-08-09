@@ -11,6 +11,14 @@
 #define MAX_LIFTS 10
 #define WINDOW_MARGIN 2
 
+typedef struct Injury {
+
+    char start_date[15];
+    char end_date[15];
+    char name[100];
+
+} Injury;
+
 typedef struct Lift {
 
     char date[15];
@@ -53,6 +61,119 @@ void invalid_input(const char *error_message, WINDOW *menu_window) {
     echo();
     wclear(menu_window);
 }
+
+void add_injury(sqlite3 *db, WINDOW *menu_window) {
+    wclear(menu_window);
+    box(menu_window, 0, 0);
+
+    Injury injury;
+
+    while (1) {
+        box(menu_window, 0, 0);
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Add Injury");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+        mvwprintw(menu_window, 3, 2, "Start Date (YYYY/MM/DD): ");
+        wrefresh(menu_window);
+
+        wmove(menu_window, 3, 27); // Set the cursor position
+        wrefresh(menu_window);
+        wgetnstr(menu_window, injury.start_date, sizeof(injury.start_date));
+
+        if (strlen(injury.start_date) == 0) {
+            return;
+        }
+
+        int year, month, day;
+        if (sscanf(injury.start_date, "%d/%d/%d", &year, &month, &day) != 3) {
+            invalid_input("Invalid date format. Please use the format YYYY/MM/DD.", menu_window);
+        } else {
+            if (day < 1 || day > 31 || month < 1 || month > 12 || year < 2000 || year > 9999) {
+                invalid_input("Invalid date. Please enter a valid date.", menu_window);
+            } else {
+                break;
+            }
+        }
+    }
+
+    int iteration1 = 1;
+    while (1) {
+        box(menu_window, 0, 0);
+
+        if (iteration1 >= 1) {
+            wattron(menu_window, A_BOLD);
+            mvwprintw(menu_window, 1, 2, "Add Injury");
+            wattroff(menu_window, A_BOLD);
+            mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+            mvwprintw(menu_window, 3, 2, "Start Date (YYYY/MM/DD): %s", injury.start_date);
+            mvwprintw(menu_window, 4, 2, "End Date (YYYY/MM/DD): ");
+        } else {
+            mvwprintw(menu_window, 4, 2, "End Date (YYYY/MM/DD): ");
+        }
+
+        wrefresh(menu_window);
+        wgetnstr(menu_window, injury.end_date, sizeof(injury.end_date));
+
+        if (strlen(injury.end_date) == 0) {
+            invalid_input("End date of the injury cannot be empty", menu_window);
+            iteration1++;
+        }else{
+            break;
+        }
+    }
+    wrefresh(menu_window);
+
+    int iteration2 = 1;
+    while (1) {
+        box(menu_window, 0, 0);
+
+        if (iteration2 >= 1) {
+            wattron(menu_window, A_BOLD);
+            mvwprintw(menu_window, 1, 2, "Add Injury");
+            wattroff(menu_window, A_BOLD);
+            mvwhline(menu_window, 2, 1, ACS_HLINE, getmaxx(menu_window) - 2);
+
+            mvwprintw(menu_window, 3, 2, "Start Date (YYYY/MM/DD): %s", injury.start_date);
+            mvwprintw(menu_window, 4, 2, "End Date (YYYY/MM/DD): %s", injury.end_date);
+            mvwprintw(menu_window, 5, 2, "Name: ");
+        } else {
+            mvwprintw(menu_window, 5, 2, "Name: ");
+        }
+
+        wrefresh(menu_window);
+        wgetnstr(menu_window, injury.name, sizeof(injury.name));
+
+        if (strlen(injury.name) == 0) {
+            invalid_input("Name of the injury cannot be empty", menu_window);
+            iteration2++;
+        }else{
+            break;
+        }
+    }
+    wrefresh(menu_window);
+
+    char insert_injury_query[200];
+    sprintf(insert_injury_query, "INSERT INTO injuries(start_date, end_date, name) VALUES ('%s', '%s', '%s');", injury.start_date, injury.end_date, injury.name);
+    int rc = sqlite3_exec(db, insert_injury_query, NULL, 0, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to execute insert query: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    wattron(menu_window, A_BOLD);
+    mvwprintw(menu_window, 8, 2, "Injury added successfully. Press any key to conitue...");
+    wattroff(menu_window, A_BOLD);
+    wrefresh(menu_window);
+    getch();
+    return;
+}
+
+void display_injuries(sqlite3 *db, WINDOW *menu_window){
+    return;
+};
 
 void add_pr(sqlite3 *db, WINDOW *menu_window) {
     wclear(menu_window);
@@ -965,15 +1086,17 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     // Text to be centered
     const char* text1 = "1. Add Workout";
     const char* text2 = "2. Add PR";
-    const char* text3 = "3. Remove Workout";
-    const char* text4 = "4. Remove Lift";
-    const char* text5 = "5. Display Workouts";
-    const char* text6 = "6. Display PR";
-    const char* text7 = "7. Exit";
-    const char* text8 = "8. help";
-    const char* text9 = "Enter your choice: ";
+    const char* text3 = "3. Add Injury";
+    const char* text4 = "4. Remove Workout";
+    const char* text5 = "5. Remove Lift";
+    const char* text6 = "6. Display Workouts";
+    const char* text7 = "7. Display PR";
+    const char* text8 = "8. Display Injuries";
+    const char* text9 = "9. Exit";
+    const char* text10 = "10. help";
+    const char* text11 = "Enter your choice: ";
 
-    int numLines = 9; // Total number of lines of text
+    int numLines = 11; // Total number of lines of text
     int text_length_1 = strlen(text1);
     int text_length_2 = strlen(text2);
     int text_length_3 = strlen(text3);
@@ -983,6 +1106,8 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     int text_length_7 = strlen(text7);
     int text_length_8 = strlen(text8);
     int text_length_9 = strlen(text9);
+    int text_length_10 = strlen(text10);
+    int text_length_11 = strlen(text11);
 
     int centerX = (window_width - text_length_1) / 2; // Calculate the center position
     int centerY = (window_height - numLines) / 2; // Calculate the center position
@@ -996,10 +1121,12 @@ int display_menu(int window_height, int window_width, WINDOW *menu_window){
     mvwprintw(menu_window, centerY + 6, centerX, "%s", text7);
     mvwprintw(menu_window, centerY + 7, centerX, "%s", text8);
     mvwprintw(menu_window, centerY + 8, centerX, "%s", text9);
+    mvwprintw(menu_window, centerY + 9, centerX, "%s", text10);
+    mvwprintw(menu_window, centerY + 10, centerX, "%s", text11);
     wrefresh(menu_window);
 
     // resetting the cursor to be in the menu window
-    wmove(menu_window, centerY + 8, centerX + text_length_9);
+    wmove(menu_window, centerY + 10, centerX + text_length_11);
     wrefresh(menu_window);
 
     char choice_string[10];
@@ -1157,6 +1284,20 @@ int initialize_database(sqlite3 **db) {
             sqlite3_close(*db);
             return rc;
         }
+
+        // Create the table for lifts
+        char *create_injuries_table_query = "CREATE TABLE injuries("
+                                         "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                                         "start_date TEXT,"
+                                         "end_date TEXT,"
+                                         "name TEXT,"
+                                         ");";
+        rc = sqlite3_exec(*db, create_injuries_table_query, NULL, 0, NULL);
+        if (rc != SQLITE_OK) {
+            printf("Failed to create lifts table: %s\n", sqlite3_errmsg(*db));
+            sqlite3_close(*db);
+            return rc;
+        }
     }
 
     return SQLITE_OK;
@@ -1202,21 +1343,27 @@ int main(void) {
                 add_pr(db, menu_window);
                 break;
             case 3:
-                remove_workouts(db, menu_window);
+                add_injury(db, menu_window);
                 break;
             case 4:
-                remove_lift(db, menu_window);
+                remove_workouts(db, menu_window);
                 break;
             case 5:
-                display_workouts(db, menu_window);
+                remove_lift(db, menu_window);
                 break;
             case 6:
-                display_pr(db, menu_window);
+                display_workouts(db, menu_window);
                 break;
             case 7:
+                display_pr(db, menu_window);
+                break;
+            case 8:
+                display_injuries(db, menu_window);
+                break;
+            case 9:
                 endwin();
                 return 0;
-            case 8:
+            case 10:
                 help_menu(menu_window);
                 break;
             default:
