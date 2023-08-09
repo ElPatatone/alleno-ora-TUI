@@ -172,6 +172,102 @@ void add_injury(sqlite3 *db, WINDOW *menu_window) {
 }
 
 void display_injuries(sqlite3 *db, WINDOW *menu_window){
+    wclear(menu_window);
+    box(menu_window, 0, 0);
+
+    char *select_query = "SELECT * FROM injuries ORDER BY start_date DESC;";
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, select_query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        printf("Failed to execute select query: %s\n", sqlite3_errmsg(db));
+        return;
+    }
+
+    int max_rows, max_columns;
+    getmaxyx(menu_window, max_rows, max_columns);
+
+    int top_index = 0;  // Index of the topmost visible workout
+    int visible_rows = max_rows - 7;  // Adjust the number of visible rows as needed
+
+    char line[256];
+    int injury_number = 0;
+
+    int ch;
+    do {
+        wclear(menu_window);
+        box(menu_window, 0, 0);
+
+        switch (ch) {
+            case KEY_UP:
+                top_index = (top_index > 0) ? top_index - 1 : 0;
+                break;
+            case KEY_DOWN:
+                if (injury_number >= visible_rows)
+                    top_index++;
+                break;
+            default:
+                break;
+        }
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 1, 2, "Displaying all Injuries");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 2, 1, ACS_HLINE, max_columns - 2);  // Top border
+
+        wattron(menu_window, A_BOLD);
+        mvwprintw(menu_window, 3, 4, "Start Date");
+        mvwprintw(menu_window, 3, 22, "End Date");
+        mvwprintw(menu_window, 3, 49, "Name");
+        wattroff(menu_window, A_BOLD);
+        mvwhline(menu_window, 4, 1, ACS_HLINE, max_columns - 2);
+        wrefresh(menu_window);
+
+        mvwaddch(menu_window, 3, 17, ACS_VLINE);
+        mvwaddch(menu_window, 3, 35, ACS_VLINE);
+        mvwaddch(menu_window, 3, 66, ACS_VLINE);
+        wrefresh(menu_window);
+
+        injury_number = 0;
+        sqlite3_reset(stmt);  // Reset statement to re-execute the query
+
+        int row = 5;
+
+        while (sqlite3_step(stmt) == SQLITE_ROW && injury_number < top_index + visible_rows) {
+            injury_number++;
+            if (injury_number <= top_index)
+                continue;
+
+            const unsigned char *start_date = sqlite3_column_text(stmt, 1);
+            const unsigned char *end_date = sqlite3_column_text(stmt, 2);
+            const unsigned char *name = sqlite3_column_text(stmt, 3);
+
+            mvwprintw(menu_window, row, 4, "%s", start_date);
+            mvwprintw(menu_window, row, 21, "%s", end_date);
+            mvwprintw(menu_window, row, 41, "%s", name);
+
+            row++;
+
+            if (injury_number >= top_index + visible_rows)
+                break;
+        }
+
+        if (injury_number > visible_rows) {
+            mvwprintw(menu_window, visible_rows + 5, 2, "Use UP/DOWN arrow keys to scroll");
+        } else {
+            mvwprintw(menu_window, visible_rows + 5, 2, "Press Escape key to continue...");
+        }
+
+        // // Draw vertical borders
+        for (int i = 0; i < visible_rows; i++) {
+            mvwaddch(menu_window, 5 + i, 17, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 35, ACS_VLINE);
+            mvwaddch(menu_window, 5 + i, 66, ACS_VLINE);
+        }
+
+        wrefresh(menu_window);
+    } while ((ch = getch()) != 27);  // Exit on Escape key press (27 is the Escape key code)
+
+    sqlite3_finalize(stmt);
     return;
 };
 
