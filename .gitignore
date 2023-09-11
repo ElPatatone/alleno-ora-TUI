@@ -1,3 +1,6 @@
-*.txt
+config.txt
+CMakeCache.txt
+compile_flags.txt
+*.norg
 *.out
 *.db
