@@ -22,7 +22,7 @@ alias alleno="cd ~/path/alleno-ora/build && ./alleno && cd -"
 
 I have plans in the future to make a binary you can add to your path to run it globally more easily.
 
-## Usage
+## Features
 
 Right now the program has this options:
 
