@@ -1,6 +1,10 @@
 # alleno-ora
 
-> > This is in active developement so expect the program to change a lot very quickly.
+> > Not currently maintaining this repo as I am working on a different version for alleno-ora.
+> > The TUI is nice to use but after sometime of using it, it felt like an overcomplicated way of solving my problem.
+> > Instead I want to make a CLI tool that will let me parse a text file in a specific format with the workout information,
+> > then I can just save that information to a database like sqlite3 and be able to do some data
+> > visualisation and analysis using python.
 
 Alleno ora means I train now in italian.  
 This is a TUI application written in C with the Ncurses library to help manage and see your workout progress.
@@ -34,10 +38,3 @@ Right now the program has this options:
 6. Display workout
 7. Display PR
 8. Display Injury
-
-## TODO
-
-- [ ] calculate the improvement for a specific lifts PR.
-- [ ] calculate average/total amount time spent in the gym for any given time frame.
-- [ ] check for any lifts that have been stagnant.
-- [ ] Sort the list by most or least time spent, and by the earliest or latest workout done time wise.
