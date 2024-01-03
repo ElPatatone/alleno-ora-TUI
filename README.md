@@ -1,10 +1,6 @@
 # alleno-ora
 
-> > Not currently maintaining this repo as I am working on a different version for alleno-ora.
-> > The TUI is nice to use but after sometime of using it, it felt like an overcomplicated way of solving my problem.
-> > Instead I want to make a CLI tool that will let me parse a text file in a specific format with the workout information,
-> > then I can just save that information to a database like sqlite3 and be able to do some data
-> > visualisation and analysis using python.
+> Not actively working on this anymore, I am making a CLI version to focus on simplicity. This can be found here: https://github.com/ElPatatone/alleno-ora
 
 Alleno ora means I train now in italian.  
 This is a TUI application written in C with the Ncurses library to help manage and see your workout progress.
