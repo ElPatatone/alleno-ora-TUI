@@ -1,5 +1,5 @@
 CMakeFiles/alleno.dir/main.c.o: \
- /home/elpatatone/Documents/alleno-ora/src/main.c \
+ /home/elpatatone/Documents/old-alleno-ora/src/main.c \
  /usr/include/stdc-predef.h /usr/include/curses.h \
  /usr/include/ncurses_dll.h \
  /usr/lib/gcc/x86_64-linux-gnu/11/include/stdint.h /usr/include/stdint.h \

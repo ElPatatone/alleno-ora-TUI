@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/elpatatone/Documents/alleno-ora/src/main.c" "CMakeFiles/alleno.dir/main.c.o" "gcc" "CMakeFiles/alleno.dir/main.c.o.d"
+  "/home/elpatatone/Documents/old-alleno-ora/src/main.c" "CMakeFiles/alleno.dir/main.c.o" "gcc" "CMakeFiles/alleno.dir/main.c.o.d"
   )
 
 # Targets to which this target links.

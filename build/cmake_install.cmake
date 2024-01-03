@@ -1,4 +1,4 @@
-# Install script for directory: /home/elpatatone/Documents/alleno-ora/src
+# Install script for directory: /home/elpatatone/Documents/old-alleno-ora/src
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/elpatatone/Documents/alleno-ora/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/elpatatone/Documents/old-alleno-ora/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

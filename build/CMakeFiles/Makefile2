@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/elpatatone/Documents/alleno-ora/src
+CMAKE_SOURCE_DIR = /home/elpatatone/Documents/old-alleno-ora/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/elpatatone/Documents/alleno-ora/build
+CMAKE_BINARY_DIR = /home/elpatatone/Documents/old-alleno-ora/build
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -81,14 +81,14 @@ clean: CMakeFiles/alleno.dir/clean
 CMakeFiles/alleno.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/alleno.dir/build.make CMakeFiles/alleno.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpatatone/Documents/alleno-ora/build/CMakeFiles --progress-num=1,2 "Built target alleno"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/elpatatone/Documents/old-alleno-ora/build/CMakeFiles --progress-num=1,2 "Built target alleno"
 .PHONY : CMakeFiles/alleno.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/alleno.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpatatone/Documents/alleno-ora/build/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpatatone/Documents/old-alleno-ora/build/CMakeFiles 2
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/alleno.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpatatone/Documents/alleno-ora/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/elpatatone/Documents/old-alleno-ora/build/CMakeFiles 0
 .PHONY : CMakeFiles/alleno.dir/rule
 
 # Convenience name for target.

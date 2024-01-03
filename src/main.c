@@ -1336,7 +1336,7 @@ bool check_for_database(const char *path) {
 }
 
 int initialize_database(sqlite3 **db) {
-    const char *database_path = "/home/elpatatone/Documents/alleno-ora/database/workouts.db";
+    const char *database_path = "/home/elpatatone/Documents/old-alleno-ora/database/workouts.db";
     bool db_exists = check_for_database(database_path);
     int rc = sqlite3_open(database_path, db);
 
