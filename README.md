@@ -34,3 +34,7 @@ Right now the program has this options:
 6. Display workout
 7. Display PR
 8. Display Injury
+
+## Demo
+
+![](demo/demo.gif)
